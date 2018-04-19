@@ -103,3 +103,6 @@ ENV/
 # bam files
 .bam
 .bam.bai
+
+# nohup
+nohup.out
