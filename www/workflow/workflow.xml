@@ -1,0 +1,42 @@
+<workflow>
+  <trans id="rnaDB" label="Gather miRNA / lncRNA data" owner="team" time="200h" ready="0" x="573" y="143">
+    <input id="lncRNA" label="lncRNA from LNCpedia: ~120k" href="https://lncipedia.org/" x="129" y="202" />
+    <input id="miRNA" label="miRNA from miRBase: ~38k" href="http://www.mirbase.org/ftp.shtml" x="152" y="100" />
+    <input id="ncRNA" label="ncRNA from NONCODE: ~500k" href="http://www.noncode.org/download.php" x="126" y="151" />
+    <todo>Identify all lncRNA from the ncRNA</todo>
+    <output id="rnaDB_out" label="mi/lncRNA Database" x="1091" y="141" />
+  </trans>
+  <trans id="interactionmatrix" label="Interaction matrix" time="200h" ready="0" owner="team" x="568" y="291">
+    <input ref="rnaDB.rnaDB_out" />
+    <input id="interactions" label="miRNA - lncRNA interactions from Starbase: ~10k" href="http://starbase.sysu.edu.cn/mirLncRNA.php" x="100" y="254" />
+    <input id="textmining" label="Text mining: PubMed Open Access Subset" x="102" y="301" />
+    <output id="interactionmatrix_out" label="Binary interaction matrix" x="1108" y="287" />
+  </trans>
+  <trans id="targetsitesDB" label="Targets and Interaction sites" time="200h" ready="0" owner="team" x="566" y="449">
+    <input ref="interactionmatrix.interactionmatrix_out" />
+    <input id="starbaseadditional" label="Target location and transcripts: Starbase" x="117" y="433" />
+    <input id="miRNAinteractionsites" label="miRNA interaction sites from circtoTraits" href="http://gyanxet-beta.com/circdb/" x="120" y="484" />
+    <input id="lncRNAinteractionsites" label="lncRNA interaction sites from DES-ncRNA" href="http://www.cbrc.kaust.edu.sa/des_ncrna/home/index.php" x="109" y="382" />
+    <output id="targetsitesDB_out" label="Database of targets and interaction sites" x="1181" y="443" />
+  </trans>
+  <trans id="differentialexpressioncancer" label="Differential expression data for Cancer" time="100h" ready="0" owner="team" x="613" y="730">
+    <input id="cancerdata" label="Cancer data from TCGA" href="https://portal.gdc.cancer.gov/" x="167" y="727" />
+    <output id="differentialexpressioncancer_out" label="Database of expression data for Cancer" x="1187" y="725" />
+  </trans>
+  <trans id="differentialexpressionAS" label="Differential expression data for Atherosclerosis" time="100h" ready="0" owner="team" x="656" y="596">
+    <input id="ASdata" label="Atherosclerosis data - TBC" x="161" y="596" />
+    <output id="differentialexpressionAS_out" label="Database of expression data for Atherosclerosis" x="1223" y="593" />
+  </trans>
+  <trans id="expressiondatamapping" label="Atherosclerosis and Cancer expression data mapping to the mi/lncRNA DB" time="200h" ready="0" owner="team" x="875" y="896">
+    <input ref="differentialexpressioncancer.differentialexpressioncancer_out" />
+    <input ref="rnaDB.rnaDB_out" />
+    <output id="expressiondatamapping_out" label="Mapping of Disease data to the mi/lnc RNA databse" x="876" y="1054" />
+  </trans>
+  <trans id="network" label="Display / Compare network" time="200h" ready="0" owner="team" x="1683" y="472">
+    <input ref="rnaDB.rnaDB_out" />
+    <input ref="interactionmatrix.interactionmatrix_out" />
+    <input ref="targetsitesDB.targetsitesDB_out" />
+    <input ref="expressiondatamapping.expressiondatamapping_out" />
+    <output id="network_out" label="Display interaction networks" x="1686" y="660" />
+  </trans>
+</workflow>
