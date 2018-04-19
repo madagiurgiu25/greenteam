@@ -37,10 +37,10 @@ $(document).ready(function () {
         $('#page-content').load("home.html #page-content > *", function (responseText, textStatus, XMLHttpRequest) {
             jQuery.getScript("js/homeScript.js")
                 .done(function () {
-                    //console.log("done load homeScript.js");
+                    console.log("done load homeScript.js");
                 })
                 .fail(function () {
-                    //console.log("fail load homeScript.js");
+                    console.log("fail load homeScript.js");
                 });
 
             $('#workflow').load("workflow/index.html > *", function (responseText, textStatus, XMLHttpRequest) {
