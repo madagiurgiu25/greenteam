@@ -99,3 +99,7 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# bam files
+.bam
+.bam.bai
