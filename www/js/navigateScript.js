@@ -35,14 +35,7 @@ $(document).ready(function () {
     function loadHome() {
         window.history.pushState('', null, '/#home');
         $('#page-content').load("home.html #page-content > *", function (responseText, textStatus, XMLHttpRequest) {
-            jQuery.getScript("js/homeScript.js")
-                .done(function () {
-                    console.log("done load homeScript.js");
-                })
-                .fail(function () {
-                    console.log("fail load homeScript.js");
-                });
-
+            jQuery.getScript("js/homeScript.js");
             $('#workflow').load("workflow/index.html > *", function (responseText, textStatus, XMLHttpRequest) {
             });
         });
