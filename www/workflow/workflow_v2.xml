@@ -116,7 +116,7 @@
       </trans>
       <trans id="sources7" owner="team" time="25h" ready="0" label="7. Download and parse lncRNAdb" x="694" y="748">
         <input ref="sources2.sources2_out" />
-        <output id="sources7_out" label="lncRNA data" x="1055" y="760" />
+        <output id="sources7_out" label="lncRNA data" x="1052" y="744" />
       </trans>
       <trans id="sources8" owner="team" time="20h" ready="0" label="8. Analyze miRNA / lncRNA data" x="1732" y="420">
         <input ref="sources3.sources3_out" />
@@ -126,9 +126,13 @@
         <input ref="sources7.sources7_out" />
         <output id="sources8_out" label="Overlap, comparison of all miRNA, lncRNA \n data from different sources" x="1733" y="571" />
       </trans>
-      <trans id="sources9" owner="team" time="20h" ready="0" label="9. Compare to CBN data" x="1737" y="718">
+      <trans id="sources9" owner="team" time="20h" ready="0" label="9. Compare to CBN data" x="1738" y="726">
         <input ref="sources8.sources8_out" />
         <output id="sources9_out" label="Map mi/lncRNA to CBN (if applicable)" x="1739" y="874" />
+      </trans>
+      <trans id="sources10" owner="team" time="25h" ready="0" label="10. Analyze CIRC2TRAITS for circular RNA" x="754" y="900">
+        <input ref="sources2.sources2_out" />
+        <output id="sources10_out" label="Circular RNA" x="1267" y="888" />
       </trans>
     </workflow>
     <output id="sources_out" label="Identification and analysis of \n miRNA and lncRNA from different tools \n and databases (sequence, interactions etc.)" x="761" y="470" />
