@@ -7,7 +7,7 @@
       <trans owner="team" time="10h" ready="100" label="1. Kick-off meetings, \n introduction to the topic" x="100" y="100">
         <todo>Kick-off meetings, introduction to the topic</todo>
       </trans>
-      <trans owner="team" time="35h" ready="57" label="2. Research (online, papers, tools...)" x="131" y="222">
+      <trans owner="team" time="35h" ready="65" label="2. Research (online, papers, tools...)" x="131" y="222">
         <todo>Research (online, papers, tools...)</todo>
       </trans>
       <trans owner="team" time="10h" ready="100" label="3. Create Workflow - 1st version" x="106" y="336">
@@ -28,7 +28,7 @@
       <trans owner="team" time="15h" ready="0" label="8. Prepare presentation for \n final conference 01.08" x="575" y="370">
         <todo>Prepare presentation for final conference 01.08</todo>
       </trans>
-      <trans owner="team" time="70h" ready="0" label="9. Write book chapter" x="575" y="495">
+      <trans owner="team" time="70h" ready="5" label="9. Write book chapter" x="575" y="495">
         <todo>Write book chapter</todo>
       </trans>
       <trans owner="team" time="5h" ready="0" label="10. Final review, save and \n back-up data data" x="568" y="617">
@@ -41,13 +41,13 @@
   <!-- ****************** -->
   <trans id="technicalsetup" label="Technical setup" x="100" y="211">
     <workflow parentref="mingleRNA">
-      <trans owner="team" time="25h" ready="0" label="Setup database (neo4j / mySQL)" x="113" y="100">
+      <trans owner="team" time="40h" ready="50" label="Setup database (neo4j / mySQL)" x="113" y="100">
         <todo>Setup database (neo4j / mySQL)</todo>
       </trans>
       <trans owner="team" time="10h" ready="100" label="Create website on bioclient1" x="100" y="200">
         <todo>Create website on bioclient1</todo>
       </trans>
-      <trans owner="team" time="5h" ready="4" label="Update biocluster group folder / github" x="140" y="314" />
+      <trans owner="team" time="5h" ready="10" label="Update biocluster group folder / github" x="140" y="314" />
     </workflow>
     <output id="technicalsetup_out1" label="database setup" x="612" y="236" />
     <output id="technicalsetup_out2" label="website setup" x="605" y="173" />
@@ -90,13 +90,13 @@
   <!-- ******************************************** -->
   <trans id="sources" label="Data sources for miRNA / lncRNA sequences" x="188" y="469">
     <workflow parentref="mingleRNA">
-      <trans id="sources1" owner="team" time="10h" ready="80" label="1. Identify miRNA sequence databases" x="104" y="100">
+      <trans id="sources1" owner="team" time="10h" ready="90" label="1. Identify miRNA sequence databases" x="104" y="100">
         <output id="sources1_out" label="Initial research for miRNA: \n identify databases and tools" x="100" y="361" />
       </trans>
-      <trans id="sources2" owner="team" time="10h" ready="80" label="2. Identify lncRNA sequence databases" x="103" y="819">
+      <trans id="sources2" owner="team" time="10h" ready="90" label="2. Identify lncRNA sequence databases" x="103" y="819">
         <output id="sources2_out" label="Initial research for lncRNA: \n identify databases and tools" x="108" y="564" />
       </trans>
-      <trans id="sources3" owner="team" time="25h" ready="0" label="3. Download and parse miRBase" x="679" y="158">
+      <trans id="sources3" owner="team" time="25h" ready="12" label="3. Download and parse miRBase" x="679" y="158">
         <input ref="sources1.sources1_out" />
         <output id="sources3_out" label="miRNA data" x="1060" y="159" />
       </trans>
@@ -105,16 +105,16 @@
         <input ref="sources2.sources2_out" />
         <output id="sources4_out" label="lncRNA, miRNA data" x="1101" y="317" />
       </trans>
-      <trans id="sources5" owner="team" time="25h" ready="0" label="5. Download and parse noncode" x="693" y="451">
+      <trans id="sources5" owner="team" time="25h" ready="20" label="5. Download and parse noncode" x="693" y="451">
         <input ref="sources1.sources1_out" />
         <input ref="sources2.sources2_out" />
         <output id="sources5_out" label="lncRNA, miRNA data" x="1104" y="449" />
       </trans>
-      <trans id="sources6" owner="team" time="25h" ready="0" label="6. Download and parse LNCpedia" x="697" y="595">
+      <trans id="sources6" owner="team" time="25h" ready="60" label="6. Download and parse LNCpedia" x="697" y="595">
         <input ref="sources2.sources2_out" />
         <output id="sources6_out" label="lncRNA data" x="1042" y="597" />
       </trans>
-      <trans id="sources7" owner="team" time="25h" ready="0" label="7. Download and parse lncRNAdb" x="694" y="748">
+      <trans id="sources7" owner="team" time="25h" ready="50" label="7. Download and parse lncRNAdb" x="694" y="748">
         <input ref="sources2.sources2_out" />
         <output id="sources7_out" label="lncRNA data" x="1052" y="744" />
       </trans>
@@ -145,11 +145,11 @@
       <trans id="interactions1" owner="team" time="10h" ready="80" label="1. Identify relevant tools and \n publications for interactions" x="100" y="334">
         <output id="interactions1_out" label="Initial research" x="431" y="339" />
       </trans>
-      <trans id="interactions2" owner="team" time="25h" ready="0" label="2. Download and parse Starbase" x="852" y="104">
+      <trans id="interactions2" owner="team" time="25h" ready="8" label="2. Download and parse Starbase" x="852" y="104">
         <input ref="interactions1.interactions1_out" />
         <output id="interactions2_out" label="Interaction data" wref="bla" x="1358" y="100" />
       </trans>
-      <trans id="interactions3" owner="team" time="25h" ready="0" label="3. Download and parse Miranda" x="849" y="250">
+      <trans id="interactions3" owner="team" time="25h" ready="40" label="3. Download and parse Miranda" x="849" y="250">
         <input ref="interactions1.interactions1_out" />
         <output id="interactions3_out" label="Interaction data" x="1359" y="254" />
       </trans>
@@ -185,10 +185,10 @@
   <!-- ************************************************* -->
   <trans id="expression" label="Expression data for Atherosclerosis and Cancer" x="196" y="776">
     <workflow parentref="mingleRNA">
-      <trans id="expression1" owner="team" time="10h" ready="100" label="1. Identify relevant data sources \n for differential expression for AS / Cancer" x="161" y="109">
+      <trans id="expression1" owner="team" time="10h" ready="95" label="1. Identify relevant data sources \n for differential expression for AS / Cancer" x="161" y="109">
         <output id="expression1_out" label="Initial research" x="563" y="100" />
       </trans>
-      <trans id="expression2" owner="team" time="30h" ready="26" label="2. Acquire GEO data" x="100" y="264">
+      <trans id="expression2" owner="team" time="30h" ready="50" label="2. Acquire GEO data" x="100" y="264">
         <input ref="expression1.expression1_out" />
         <output id="expression2_out" label="Geo expression data" x="479" y="256" />
       </trans>
@@ -196,7 +196,7 @@
         <input ref="expression1.expression1_out" />
         <output id="expression3_out" label="TCGA expression data" x="479" y="414" />
       </trans>
-      <trans id="expression4" owner="team" time="30h" ready="13" label="4. GEO data - differential expression analysis" x="912" y="254">
+      <trans id="expression4" owner="team" time="30h" ready="50" label="4. GEO data - differential expression analysis" x="912" y="254">
         <input ref="expression2.expression2_out" />
         <output id="expression4_out" label="Differential expression data" x="1386" y="251" />
       </trans>
@@ -263,7 +263,7 @@
     <input ref="usecases.usecases_out5" />
     <input ref="usecases.usecases_out6" />
     <workflow parentref="mingleRNA">
-      <trans id="ui1" owner="team" time="50h" ready="6" label="1. Website overall feature integration" x="133" y="100" />
+      <trans id="ui1" owner="team" time="50h" ready="10" label="1. Website overall feature integration" x="133" y="100" />
       <trans id="ui2" owner="team" time="10h" ready="10" label="2. Define input options: sequence / disease name (predefined)" x="265" y="240" />
       <trans id="ui3" owner="team" time="10h" ready="10" label="3. Define overall output layout" x="100" y="369" />
       <trans id="ui4" owner="team" time="30h" ready="0" label="4. Network: 2-fold binary interaction network \n miRNA – lncRNA – mRNA" x="984" y="123" />
