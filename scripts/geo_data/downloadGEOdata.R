@@ -3,8 +3,10 @@
 library(GEOquery)
 require(GEOquery)
 require(Biobase)
+library(GEOmetadb)
 
 analyzeGEO <- function(geoType, geoID, pathDir) {
+    
     options('download.file.method.GEOquery' = 'libcurl')
     
     if (geoType == 'GSE') {
@@ -77,6 +79,7 @@ analyzeGEO <- function(geoType, geoID, pathDir) {
                     exprs = data.matrix,
                     phenoData = pheno)
             
+            return(eset)
             ############## use the data
             # data <-
             #     getGEO(
@@ -155,17 +158,10 @@ analyzeGEO <- function(geoType, geoID, pathDir) {
             #     new('ExpressionSet',
             #         exprs = data.matrix,
             #         phenoData = pheno)
-            
-            
-            
-            ####### Step 4. run differential expression analysis
-            runDiffExpAnalysis(
-                eset = eset,
-                design = c(1, 1, 1, 1),
-                wdir = pathDir
-            )
         }
     }
+    
+    return(NULL)
 }
 
 
@@ -196,8 +192,11 @@ pathDir = "E:\\masterpraktikum\\greenteam\\scripts\\geo_data"
 setwd(pathDir)
 source("E:\\masterpraktikum\\greenteam\\scripts\\geo_data\\diffExpressionAnalysis.R")
 
+geoID = 'GSE28829'
+geoType = 'GSE' # Dataset, Series or Platform
+
 # read GEO entry and make the diff expression analysis
-analyzeGEO(geoType = geoType,
+eset = analyzeGEO(geoType = geoType,
            geoID = geoID,
            pathDir = pathDir)
 
@@ -207,8 +206,19 @@ ids <- featureNames(eset)
 # expression matrix rows = features, columns = samples
 matrix <- exprs(eset)
 
-design <- model.matrix(~ 0+factor(cbind(df_source$source_sort)))
-colnames(design) <- cbind("krank","normal")
-fit <- lmFit(eset, design)
-fit <- eBayes(fit)
-topTable(fit, coef=1, adjust="BH")
+# design matrix generated on the fly
+design_vector <- findDesign(eset)
+
+design <- model.matrix(~ 0+factor(design_vector))
+# colnames(design) <- cbind("krank","normal")
+
+diff_exp <- runDiffExpAnalysis(matrix, design)
+volcanoplot(diff_exp)
+sum(diff_exp$adj.P.Val<0.05)
+
+
+sqlfile = getSQLiteFile()
+con = dbConnect("SQLite",sqlfile)
+dbGetQuery(con,"select gpl,title,bioc_package from gpl where
+             gpl='GPL570'")
+
