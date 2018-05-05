@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# !C:\\Python34\\python.exe
+#!C:\\Python34\\python.exe
 
 import os
 import sys
@@ -139,10 +139,13 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None):
     genesAlreadyParsed = {}
     transcriptsAlreadyParsed = {}
 
+    count = 0
     # test if the file exitst
     try:
         with open(gtffile, "r") as f:
             for line in f:
+                # count += 1
+                # print(count)
                 if line.startswith("#") is False: # ignore header lines
                     arr = line.strip("\n").split("\t")
 
@@ -373,7 +376,7 @@ def parseBed2Json(bedfile):
 
 
 if __name__ == "__main__":
-    file = sys.argv[1]
+    # file = sys.argv[1]
 
     ############# parse generic BED file with header to json
     # parseBed2Json(file)
@@ -383,7 +386,10 @@ if __name__ == "__main__":
     source = sys.argv[3]
     bedfile = sys.argv[4]
     jsonfile = sys.argv[5]
-    type = sys.argv[6]
 
-    ########### parse GTF file to BED and json
-    parseGTF(file,bedfile,jsonfile,assembly,source,type)
+    if len(sys.argv) == 7:
+        type = sys.argv[6]
+        ########### parse GTF file to BED and json
+        parseGTF(file,bedfile,jsonfile,assembly,source,type)
+    else:
+        parseGTF(file,bedfile,jsonfile,assembly,source)
