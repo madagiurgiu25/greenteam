@@ -33,7 +33,7 @@ TRANSCRIPT_TYPE = 'transcript_type'
 
 # headers in GTF file
 gtfdict = {'gene_id': "", 'transcript_id': "", 'transcript_type': "", 'transcript_name': "", 'gene_name': "",
-           'gene_type': "", 'transcript_type':"", 'tag':"", 'exon_number':""}
+           'gene_type': "", 'transcript_type':"", 'tag':"", 'exon_number':"", 'Parent':""}
 
 # headers in GTF file for GENE entry
 gtfdict_gene = {'gene_id': "", 'gene_name': "", 'gene_type': "", 'tag':""}
@@ -208,8 +208,10 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None):
                             # create and parent gene
                             parentGene = {}
                             parentGene[GENE_ID] = infoDict[GENE_ID]
-                            parentGene[GENE_TYPE] = infoDict[GENE_TYPE]
-                            parentGene[GENE_NAME] = infoDict[GENE_NAME]
+                            if GENE_TYPE in infoDict:
+                                parentGene[GENE_TYPE] = infoDict[GENE_TYPE]
+                            if GENE_NAME:
+                                parentGene[GENE_NAME] = infoDict[GENE_NAME]
                             parentGene[TRANSCRIPTS] = []
 
                             bigDict.append(parentGene)
@@ -239,7 +241,8 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None):
                             # create and parent transcript
                             parentTranscript = {}
                             parentTranscript[TRANSCRIPT_ID] = parentTranscript[TRANSCRIPT_ID]
-                            parentTranscript[TRANSCRIPT_NAME] = parentTranscript[TRANSCRIPT_NAME]
+                            if TRANSCRIPT_NAME is infoDict:
+                                parentTranscript[TRANSCRIPT_NAME] = parentTranscript[TRANSCRIPT_NAME]
                             parentTranscript[EXONS] = []
 
                             transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
@@ -258,7 +261,8 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None):
                             # create parent transcript
                             parentTranscript = {}
                             parentTranscript[TRANSCRIPT_ID] = parentTranscript[TRANSCRIPT_ID]
-                            parentTranscript[TRANSCRIPT_NAME] = parentTranscript[TRANSCRIPT_NAME]
+                            if TRANSCRIPT_NAME is infoDict:
+                                parentTranscript[TRANSCRIPT_NAME] = parentTranscript[TRANSCRIPT_NAME]
                             parentTranscript[EXONS] = []
                             transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
 
@@ -268,8 +272,10 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None):
                             # create and parent gene for transcript
                             parentGene = {}
                             parentGene[GENE_ID] = infoDict[GENE_ID]
-                            parentGene[GENE_TYPE] = infoDict[GENE_TYPE]
-                            parentGene[GENE_NAME] = infoDict[GENE_NAME]
+                            if GENE_TYPE in infoDict:
+                                parentGene[GENE_TYPE] = infoDict[GENE_TYPE]
+                            if GENE_NAME:
+                                parentGene[GENE_NAME] = infoDict[GENE_NAME]
                             parentGene[TRANSCRIPTS] = []
 
                             # add transcript to parent gene
@@ -303,6 +309,14 @@ def parseGTF2BED(gtfjson,bedoutput, assembly, source):
         for item in gtfjson:
             for t in item[TRANSCRIPTS]:
                 for exon in t[EXONS]:
+                    if item[GENE_TYPE] is None:
+                        item[GENE_TYPE] = ""
+                    if item[GENE_NAME] is None:
+                        item[GENE_NAME] = ""
+                    if item[TRANSCRIPT_TYPE] is None:
+                        item[TRANSCRIPT_TYPE] = ""
+                    if item[TRANSCRIPT_NAME] is None:
+                        item[TRANSCRIPT_NAME] = ""
                     toWrite = "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}\t{13}\t{14}\t{15}\n"\
                         .format(exon[CHR],
                                 exon[START],
@@ -376,20 +390,22 @@ def parseBed2Json(bedfile):
 
 
 if __name__ == "__main__":
-    # file = sys.argv[1]
 
-    ############# parse generic BED file with header to json
-    # parseBed2Json(file)
-
-    file = sys.argv[1]
-    assembly = sys.argv[2]
-    source = sys.argv[3]
-    bedfile = sys.argv[4]
-    jsonfile = sys.argv[5]
-
-    if len(sys.argv) == 7:
-        type = sys.argv[6]
-        ########### parse GTF file to BED and json
-        parseGTF(file,bedfile,jsonfile,assembly,source,type)
+    ############ parse generic BED file with header to json
+    if len(sys.argv) > 1:
+        file = sys.argv[1]
+        parseBed2Json(file)
     else:
-        parseGTF(file,bedfile,jsonfile,assembly,source)
+        ########### parse GTF file to BED and json
+        file = sys.argv[1]
+        assembly = sys.argv[2]
+        source = sys.argv[3]
+        bedfile = sys.argv[4]
+        jsonfile = sys.argv[5]
+
+        if len(sys.argv) == 7:
+            type = sys.argv[6]
+            ########### parse GTF file to BED and json
+            parseGTF(file,bedfile,jsonfile,assembly,source,type)
+        else:
+            parseGTF(file,bedfile,jsonfile,assembly,source)
