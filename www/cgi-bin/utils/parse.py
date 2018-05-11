@@ -210,7 +210,7 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None):
                             parentGene[GENE_ID] = infoDict[GENE_ID]
                             if GENE_TYPE in infoDict:
                                 parentGene[GENE_TYPE] = infoDict[GENE_TYPE]
-                            if GENE_NAME:
+                            if GENE_NAME in infoDict:
                                 parentGene[GENE_NAME] = infoDict[GENE_NAME]
                             parentGene[TRANSCRIPTS] = []
 
@@ -240,9 +240,9 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None):
                             # GENE parent exists but not the Transcript
                             # create and parent transcript
                             parentTranscript = {}
-                            parentTranscript[TRANSCRIPT_ID] = parentTranscript[TRANSCRIPT_ID]
+                            parentTranscript[TRANSCRIPT_ID] = infoDict[TRANSCRIPT_ID]
                             if TRANSCRIPT_NAME is infoDict:
-                                parentTranscript[TRANSCRIPT_NAME] = parentTranscript[TRANSCRIPT_NAME]
+                                parentTranscript[TRANSCRIPT_NAME] = infoDict[TRANSCRIPT_NAME]
                             parentTranscript[EXONS] = []
 
                             transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
@@ -260,9 +260,9 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None):
 
                             # create parent transcript
                             parentTranscript = {}
-                            parentTranscript[TRANSCRIPT_ID] = parentTranscript[TRANSCRIPT_ID]
+                            parentTranscript[TRANSCRIPT_ID] = infoDict[TRANSCRIPT_ID]
                             if TRANSCRIPT_NAME is infoDict:
-                                parentTranscript[TRANSCRIPT_NAME] = parentTranscript[TRANSCRIPT_NAME]
+                                parentTranscript[TRANSCRIPT_NAME] = infoDict[TRANSCRIPT_NAME]
                             parentTranscript[EXONS] = []
                             transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
 
@@ -274,7 +274,7 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None):
                             parentGene[GENE_ID] = infoDict[GENE_ID]
                             if GENE_TYPE in infoDict:
                                 parentGene[GENE_TYPE] = infoDict[GENE_TYPE]
-                            if GENE_NAME:
+                            if GENE_NAME in infoDict:
                                 parentGene[GENE_NAME] = infoDict[GENE_NAME]
                             parentGene[TRANSCRIPTS] = []
 
@@ -309,13 +309,13 @@ def parseGTF2BED(gtfjson,bedoutput, assembly, source):
         for item in gtfjson:
             for t in item[TRANSCRIPTS]:
                 for exon in t[EXONS]:
-                    if item[GENE_TYPE] is None:
+                    if GENE_TYPE is item:
                         item[GENE_TYPE] = ""
-                    if item[GENE_NAME] is None:
+                    if GENE_NAME is item:
                         item[GENE_NAME] = ""
-                    if item[TRANSCRIPT_TYPE] is None:
+                    if TRANSCRIPT_TYPE is item:
                         item[TRANSCRIPT_TYPE] = ""
-                    if item[TRANSCRIPT_NAME] is None:
+                    if TRANSCRIPT_NAME is item:
                         item[TRANSCRIPT_NAME] = ""
                     toWrite = "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}\t{13}\t{14}\t{15}\n"\
                         .format(exon[CHR],
@@ -392,7 +392,7 @@ def parseBed2Json(bedfile):
 if __name__ == "__main__":
 
     ############ parse generic BED file with header to json
-    if len(sys.argv) > 1:
+    if len(sys.argv) == 2:
         file = sys.argv[1]
         parseBed2Json(file)
     else:
