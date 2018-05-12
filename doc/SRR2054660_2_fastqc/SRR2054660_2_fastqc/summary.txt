@@ -1,0 +1,11 @@
+PASS	Basic Statistics	SRR2054660_2.fastq.gz
+PASS	Per base sequence quality	SRR2054660_2.fastq.gz
+PASS	Per sequence quality scores	SRR2054660_2.fastq.gz
+FAIL	Per base sequence content	SRR2054660_2.fastq.gz
+FAIL	Per base GC content	SRR2054660_2.fastq.gz
+WARN	Per sequence GC content	SRR2054660_2.fastq.gz
+PASS	Per base N content	SRR2054660_2.fastq.gz
+PASS	Sequence Length Distribution	SRR2054660_2.fastq.gz
+FAIL	Sequence Duplication Levels	SRR2054660_2.fastq.gz
+FAIL	Overrepresented sequences	SRR2054660_2.fastq.gz
+FAIL	Kmer Content	SRR2054660_2.fastq.gz

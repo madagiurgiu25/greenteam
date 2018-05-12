@@ -304,7 +304,7 @@ def parseGTF2BED(gtfjson,bedoutput, assembly, source):
 
         fout = open(bedoutput,'w')
         # write header
-        fout.write("#chr\tstart_exon\tstop_exon\tstrand\tsource\tassembly\tstart_gene\tstop_gene\tgene_id\tgene_name\tgene_type\tstart_transcript\tstop_transcript\ttranscript_name\ttranscript_type\n")
+        fout.write("#chr\tstart_exon\tstop_exon\tstrand\tsource\tassembly\tstart_gene\tstop_gene\tgene_id\tgene_name\tgene_type\tstart_transcript\tstop_transcript\ttranscript_id\ttranscript_name\ttranscript_type\n")
 
         for item in gtfjson:
             # complete dictionary
