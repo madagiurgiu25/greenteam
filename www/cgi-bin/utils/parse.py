@@ -405,7 +405,7 @@ if __name__ == "__main__":
 
         if len(sys.argv) == 7:
             type = sys.argv[6]
-            ########### parse GTF file to BED and json
+            ########### parse GTF file to BED and json with type
             parseGTF(file,bedfile,jsonfile,assembly,source,type)
         else:
             parseGTF(file,bedfile,jsonfile,assembly,source)
