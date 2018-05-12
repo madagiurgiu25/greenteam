@@ -36,13 +36,13 @@ gtfdict = {'gene_id': "", 'transcript_id': "", 'transcript_type': "", 'transcrip
            'gene_type': "", 'transcript_type':"", 'tag':"", 'exon_number':"", 'Parent':""}
 
 # headers in GTF file for GENE entry
-gtfdict_gene = {'gene_id': "", 'gene_name': "", 'gene_type': "", 'tag':""}
+gtfdict_gene = {'gene_id': "", 'gene_name': "", 'gene_type': "", 'tag':"",'start':"",'stop':"",'strand':""}
 
 # headers in GTF file for TRANSCRIPT entry
-gtfdict_transcript = {'transcript_id': "", 'transcript_type': "", 'transcript_name': "", 'transcript_type':"", 'tag':""}
+gtfdict_transcript = {'transcript_id': "", 'transcript_type': "", 'transcript_name': "", 'transcript_type':"", 'tag':"",'start':"",'stop':"",'strand':""}
 
 # headers in GTF file for EXON entry
-gtfdict_exon = {'exon_number': "", 'tag':""}
+gtfdict_exon = {'exon_number': "", 'tag':"",'start':"",'stop':"",'strand':""}
 
 
 def infoString2Dict(infoString):
@@ -307,16 +307,19 @@ def parseGTF2BED(gtfjson,bedoutput, assembly, source):
         fout.write("#chr\tstart_exon\tstop_exon\tstrand\tsource\tassembly\tstart_gene\tstop_gene\tgene_id\tgene_name\tgene_type\tstart_transcript\tstop_transcript\ttranscript_name\ttranscript_type\n")
 
         for item in gtfjson:
+            # complete dictionary
+            for key in gtfdict_gene:
+                if key not in item:
+                    item[key] = ''
+
             for t in item[TRANSCRIPTS]:
+                for key in gtfdict_transcript:
+                    if key not in item:
+                        item[key] = ''
+
+
                 for exon in t[EXONS]:
-                    if GENE_TYPE is item:
-                        item[GENE_TYPE] = ""
-                    if GENE_NAME is item:
-                        item[GENE_NAME] = ""
-                    if TRANSCRIPT_TYPE is item:
-                        item[TRANSCRIPT_TYPE] = ""
-                    if TRANSCRIPT_NAME is item:
-                        item[TRANSCRIPT_NAME] = ""
+
                     toWrite = "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}\t{13}\t{14}\t{15}\n"\
                         .format(exon[CHR],
                                 exon[START],
