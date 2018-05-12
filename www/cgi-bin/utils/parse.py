@@ -147,7 +147,7 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None):
                 # count += 1
                 # print(count)
                 if line.startswith("#") is False: # ignore header lines
-                    arr = line.strip("\n").split("\t")
+                    arr = line.strip("\n").replace('"',"").split("\t")
 
                     # parse the info string in the entry
                     infoDict = infoString2Dict(arr[8])
