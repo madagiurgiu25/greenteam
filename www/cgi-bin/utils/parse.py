@@ -315,8 +315,7 @@ def parseGTF2BED(gtfjson,bedoutput, assembly, source):
             for t in item[TRANSCRIPTS]:
                 for key in gtfdict_transcript:
                     if key not in item:
-                        item[key] = ''
-
+                        t[key] = ''
 
                 for exon in t[EXONS]:
 
