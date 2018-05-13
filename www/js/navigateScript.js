@@ -28,7 +28,13 @@ $(document).ready(function () {
 
     function loadProject() {
         $('#page-content').load("project.html #page-content > *", function (responseText, textStatus, XMLHttpRequest) {
+            loadNetwork();
+        });
+    }
 
+    function loadNetwork(){
+        $('#network').load("network.html > *", function (responseText, textStatus, XMLHttpRequest) {
+            jQuery.getScript("js/networkScript.js");
         });
     }
 
