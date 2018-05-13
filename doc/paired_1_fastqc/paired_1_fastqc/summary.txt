@@ -1,0 +1,11 @@
+PASS	Basic Statistics	paired_1.fastq.gz
+PASS	Per base sequence quality	paired_1.fastq.gz
+PASS	Per sequence quality scores	paired_1.fastq.gz
+FAIL	Per base sequence content	paired_1.fastq.gz
+WARN	Per base GC content	paired_1.fastq.gz
+FAIL	Per sequence GC content	paired_1.fastq.gz
+PASS	Per base N content	paired_1.fastq.gz
+WARN	Sequence Length Distribution	paired_1.fastq.gz
+FAIL	Sequence Duplication Levels	paired_1.fastq.gz
+FAIL	Overrepresented sequences	paired_1.fastq.gz
+WARN	Kmer Content	paired_1.fastq.gz
