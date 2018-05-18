@@ -7,7 +7,7 @@
       <trans owner="team" time="10h" ready="100" label="1. Kick-off meetings, \n introduction to the topic" x="100" y="100">
         <todo>Kick-off meetings, introduction to the topic</todo>
       </trans>
-      <trans owner="team" time="35h" ready="65" label="2. Research (online, papers, tools...)" x="131" y="222">
+      <trans owner="team" time="45h" ready="77" label="2. Research (online, papers, tools...)" x="131" y="222">
         <todo>Research (online, papers, tools...)</todo>
       </trans>
       <trans owner="team" time="10h" ready="100" label="3. Create Workflow - 1st version" x="106" y="336">
@@ -16,7 +16,7 @@
       <trans owner="team" time="10h" ready="100" label="4. Create Workflow - 2st version" x="106" y="452">
         <todo>Create Workflow - 2st version</todo>
       </trans>
-      <trans owner="team" time="15h" ready="2" label="5. Update Workflow (weekly report)" x="123" y="573">
+      <trans owner="team" time="15h" ready="33" label="5. Update Workflow (weekly report)" x="123" y="573">
         <todo>Update Workflow (weekly report)</todo>
       </trans>
       <trans owner="team" time="15h" ready="100" label="6. Prepare presentation for \n kick-off conference 24.04" x="580" y="101">
@@ -28,7 +28,7 @@
       <trans owner="team" time="15h" ready="0" label="8. Prepare presentation for \n final conference 01.08" x="575" y="370">
         <todo>Prepare presentation for final conference 01.08</todo>
       </trans>
-      <trans owner="team" time="70h" ready="5" label="9. Write book chapter" x="575" y="495">
+      <trans owner="team" time="70h" ready="7" label="9. Write book chapter" x="575" y="495">
         <todo>Write book chapter</todo>
       </trans>
       <trans owner="team" time="5h" ready="0" label="10. Final review, save and \n back-up data data" x="568" y="617">
@@ -41,8 +41,8 @@
   <!-- ****************** -->
   <trans id="technicalsetup" label="Technical setup" x="100" y="211">
     <workflow parentref="mingleRNA">
-      <trans owner="team" time="40h" ready="50" label="Setup database (neo4j / mySQL)" x="113" y="100">
-        <todo>Setup database (neo4j / mySQL)</todo>
+      <trans owner="team" time="20h" ready="50" label="Setup database (neo4j / mySQL)" x="113" y="100">
+        <todo>Setup database (mongoDB)</todo>
       </trans>
       <trans owner="team" time="10h" ready="100" label="Create website on bioclient1" x="100" y="200">
         <todo>Create website on bioclient1</todo>
@@ -61,22 +61,22 @@
         <todo>Introduction, 6 phases for Atherosclerosis</todo>
         <output id="cbn1_out" label="Initial research" x="499" y="100" />
       </trans>
-      <trans id="cbn2" owner="team" time="60h" ready="5" label="2. Download and parse network \n for each phase" x="122" y="242">
+      <trans id="cbn2" owner="team" time="10h" ready="50" label="2. Download and parse network \n for each phase" x="122" y="242">
         <todo>Download and parse network for each phase</todo>
         <input ref="cbn1.cbn1_out" />
         <output id="cbn2_out" label="Database of CBN interactions for each phase" x="659" y="238" />
       </trans>
-      <trans id="cbn3" owner="team" time="30h" ready="0" label="3. Identify and analyze \n miRNA interactions" x="101" y="386">
+      <trans id="cbn3" owner="team" time="15h" ready="13" label="3. Identify and analyze \n miRNA interactions" x="101" y="386">
         <todo>Identify and analyze miRNA interactions</todo>
         <input ref="cbn2.cbn2_out" />
         <output id="cbn3_out" label="miRNA interactions from CBN for each phase" x="668" y="383" />
       </trans>
-      <trans id="cbn4" owner="team" time="30h" ready="0" label="4. Identify and analyze \n lncRNA interactions" x="100" y="542">
+      <trans id="cbn4" owner="team" time="15h" ready="13" label="4. Identify and analyze \n lncRNA interactions" x="100" y="542">
         <todo>Identify and analyze lncRNA interactions</todo>
         <input ref="cbn3.cbn3_out" />
         <output id="cbn4_out" label="lncRNA interactions from CBN for each phase" x="669" y="546" />
       </trans>
-      <trans id="cbn5" owner="team" time="40h" ready="0" label="5. Statistical analysis" x="102" y="682">
+      <trans id="cbn5" owner="team" time="10h" ready="0" label="5. Statistical analysis" x="102" y="682">
         <todo>Statistical analysis (plots, diagrams etc.)</todo>
         <input ref="cbn3.cbn3_out" />
         <input ref="cbn4.cbn4_out" />
@@ -90,49 +90,65 @@
   <!-- ******************************************** -->
   <trans id="sources" label="Data sources for miRNA / lncRNA sequences" x="188" y="469">
     <workflow parentref="mingleRNA">
-      <trans id="sources1" owner="team" time="10h" ready="90" label="1. Identify miRNA sequence databases" x="104" y="100">
-        <output id="sources1_out" label="Initial research for miRNA: \n identify databases and tools" x="100" y="361" />
+      <trans id="sources1" owner="team" time="15h" ready="100" label="1. Identify miRNA sequence databases" x="104" y="164">
+        <output id="sources1_out" label="Initial research for miRNA: \n identify databases and tools" x="100" y="425" />
       </trans>
-      <trans id="sources2" owner="team" time="10h" ready="90" label="2. Identify lncRNA sequence databases" x="103" y="819">
-        <output id="sources2_out" label="Initial research for lncRNA: \n identify databases and tools" x="108" y="564" />
+      <trans id="sources2" owner="team" time="15h" ready="100" label="2. Identify lncRNA sequence databases" x="103" y="883">
+        <output id="sources2_out" label="Initial research for lncRNA: \n identify databases and tools" x="108" y="628" />
       </trans>
-      <trans id="sources3" owner="team" time="25h" ready="12" label="3. Download and parse miRBase" x="679" y="158">
+      <trans id="sources3" owner="team" time="20h" ready="100" label="3. Download and parse miRBase" x="679" y="222">
         <input ref="sources1.sources1_out" />
-        <output id="sources3_out" label="miRNA data" x="1060" y="159" />
+        <output id="sources3_out" label="miRNA data" x="1060" y="223" />
       </trans>
-      <trans id="sources4" owner="team" time="25h" ready="0" label="4. Download and parse deepBase" x="686" y="318">
-        <input ref="sources1.sources1_out" />
-        <input ref="sources2.sources2_out" />
-        <output id="sources4_out" label="lncRNA, miRNA data" x="1101" y="317" />
-      </trans>
-      <trans id="sources5" owner="team" time="25h" ready="20" label="5. Download and parse noncode" x="693" y="451">
+      <trans id="sources4" owner="team" time="25h" ready="100" label="4. Download and parse gencode" x="686" y="382">
         <input ref="sources1.sources1_out" />
         <input ref="sources2.sources2_out" />
-        <output id="sources5_out" label="lncRNA, miRNA data" x="1104" y="449" />
+        <output id="sources4_out" label="lncRNA, miRNA data" x="1101" y="381" />
       </trans>
-      <trans id="sources6" owner="team" time="25h" ready="60" label="6. Download and parse LNCpedia" x="697" y="595">
+      <trans id="sources5" owner="team" time="20h" ready="100" label="5. Download and parse noncode" x="693" y="515">
+        <input ref="sources1.sources1_out" />
         <input ref="sources2.sources2_out" />
-        <output id="sources6_out" label="lncRNA data" x="1042" y="597" />
+        <output id="sources5_out" label="lncRNA, miRNA data" x="1104" y="513" />
       </trans>
-      <trans id="sources7" owner="team" time="25h" ready="50" label="7. Download and parse lncRNAdb" x="694" y="748">
+      <trans id="sources6" owner="team" time="20h" ready="100" label="6. Download and parse LNCpedia" x="697" y="659">
         <input ref="sources2.sources2_out" />
-        <output id="sources7_out" label="lncRNA data" x="1052" y="744" />
+        <output id="sources6_out" label="lncRNA data" x="1042" y="661" />
       </trans>
-      <trans id="sources8" owner="team" time="20h" ready="0" label="8. Analyze miRNA / lncRNA data" x="1732" y="420">
+      <trans id="sources7" owner="team" time="25h" ready="100" label="7. Download and parse lncRNAdb" x="694" y="812">
+        <input ref="sources2.sources2_out" />
+        <output id="sources7_out" label="lncRNA data" x="1052" y="808" />
+      </trans>
+      <trans id="sources11" owner="team" time="20h" ready="100" label="11. Map all mi/lncRNAs to hg38/mm10" x="1746" y="290">
         <input ref="sources3.sources3_out" />
         <input ref="sources4.sources4_out" />
         <input ref="sources5.sources5_out" />
         <input ref="sources6.sources6_out" />
         <input ref="sources7.sources7_out" />
-        <output id="sources8_out" label="Overlap, comparison of all miRNA, lncRNA \n data from different sources" x="1733" y="571" />
+        <output id="sources11_out" label="Maping to new assembly" x="1052" y="808" />
       </trans>
-      <trans id="sources9" owner="team" time="20h" ready="0" label="9. Compare to CBN data" x="1738" y="726">
+      <trans id="sources12" owner="team" time="20h" ready="75" label="12.Concept, design, fill out db" x="1695" y="100">
+        <input ref="sources3.sources3_out" />
+        <input ref="sources4.sources4_out" />
+        <input ref="sources5.sources5_out" />
+        <input ref="sources6.sources6_out" />
+        <input ref="sources7.sources7_out" />
+        <output id="sources12_out" label="Database collections for miRNA and lncRNA sources" x="1052" y="808" />
+      </trans>
+      <trans id="sources8" owner="team" time="50h" ready="70" label="8. Analyze miRNA / lncRNA data" x="1732" y="484">
+        <input ref="sources3.sources3_out" />
+        <input ref="sources4.sources4_out" />
+        <input ref="sources5.sources5_out" />
+        <input ref="sources6.sources6_out" />
+        <input ref="sources7.sources7_out" />
+        <output id="sources8_out" label="Overlap, comparison of all miRNA, lncRNA \n data from different sources" x="1733" y="635" />
+      </trans>
+      <trans id="sources9" owner="team" time="20h" ready="0" label="9. Compare to CBN data" x="1738" y="790">
         <input ref="sources8.sources8_out" />
-        <output id="sources9_out" label="Map mi/lncRNA to CBN (if applicable)" x="1739" y="874" />
+        <output id="sources9_out" label="Map mi/lncRNA to CBN (if applicable)" x="1739" y="938" />
       </trans>
-      <trans id="sources10" owner="team" time="25h" ready="0" label="10. Analyze CIRC2TRAITS for circular RNA" x="754" y="900">
+      <trans id="sources10" owner="team" time="40h" ready="10" label="10. Analyze CIRC2TRAITS for circular RNA" x="754" y="964">
         <input ref="sources2.sources2_out" />
-        <output id="sources10_out" label="Circular RNA" x="1267" y="888" />
+        <output id="sources10_out" label="Circular RNA" x="1267" y="952" />
       </trans>
     </workflow>
     <output id="sources_out" label="Identification and analysis of \n miRNA and lncRNA from different tools \n and databases (sequence, interactions etc.)" x="761" y="470" />
@@ -142,33 +158,33 @@
   <!-- ************************************************************************ -->
   <trans id="interactions" label="Data sources for miRNA / lncRNA / mRNA \n interactions and binding sites" x="173" y="607">
     <workflow parentref="mingleRNA">
-      <trans id="interactions1" owner="team" time="10h" ready="80" label="1. Identify relevant tools and \n publications for interactions" x="100" y="334">
+      <trans id="interactions1" owner="team" time="10h" ready="100" label="1. Identify relevant tools and \n publications for interactions" x="100" y="334">
         <output id="interactions1_out" label="Initial research" x="431" y="339" />
       </trans>
       <trans id="interactions2" owner="team" time="25h" ready="8" label="2. Download and parse Starbase" x="852" y="104">
         <input ref="interactions1.interactions1_out" />
         <output id="interactions2_out" label="Interaction data" wref="bla" x="1358" y="100" />
       </trans>
-      <trans id="interactions3" owner="team" time="25h" ready="40" label="3. Download and parse Miranda" x="849" y="250">
+      <trans id="interactions3" owner="team" time="25h" ready="72" label="3. Download and parse Miranda" x="849" y="250">
         <input ref="interactions1.interactions1_out" />
         <output id="interactions3_out" label="Interaction data" x="1359" y="254" />
       </trans>
-      <trans id="interactions4" owner="team" time="25h" ready="0" label="4. Download and parse TargetScan" x="872" y="396">
+      <trans id="interactions4" owner="team" time="25h" ready="8" label="4. Download and parse TargetScan" x="872" y="396">
         <input ref="interactions1.interactions1_out" />
         <output id="interactions4_out" label="Interaction data" x="1365" y="396" />
       </trans>
-      <trans id="interactions5" owner="team" time="30h" ready="0" label="5. Text mining for interactions and binding sites" x="934" y="541">
+      <trans id="interactions5" owner="team" time="10h" ready="0" label="5. Text mining for interactions and binding sites" x="934" y="541">
         <input ref="interactions1.interactions1_out" />
         <output id="interactions5_out" label="Interaction data" x="1363" y="534" />
       </trans>
-      <trans id="interactions6" owner="team" time="25h" ready="0" label="6. Analyze miRNA – lncRNA – mRNA (gene) interaction data" x="1941" y="291">
+      <trans id="interactions6" owner="team" time="25h" ready="40" label="6. Analyze miRNA – lncRNA – mRNA (gene) interaction data" x="1941" y="291">
         <input ref="interactions2.interactions2_out" />
         <input ref="interactions3.interactions3_out" />
         <input ref="interactions4.interactions4_out" />
         <input ref="interactions5.interactions5_out" />
         <output id="interactions6_out" label="Comparison of interaction data" x="1944" y="497" />
       </trans>
-      <trans id="interactions7" owner="team" time="40h" ready="0" label="7. Statistics about data sources \n (prediction, experimental, text mining)" x="1945" y="673">
+      <trans id="interactions7" owner="team" time="40h" ready="25" label="7. Statistics about data sources \n (prediction, experimental, text mining)" x="1945" y="673">
         <input ref="interactions6.interactions6_out" />
         <output id="interactions7_out" label="Overlap, comparison of all miRNA, lncRNA \n interaction data from different sources" x="1948" y="864" />
       </trans>
