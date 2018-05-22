@@ -21,6 +21,7 @@ COUNT = 'count'
 ALIAS='alias'
 dict_index={'gencode':2,'lncipedia':1,'noncode':2,'lncrnadb':1}
 dict_positions={'gencode':0,'lncipedia':1,'noncode':2,'lncrnadb':3}
+dict_positions_mouse={'gencode':0,'noncode':1,'lncrnadb':2}
 SOURCE='source'
 
 
@@ -109,7 +110,26 @@ def convertDict2Matrix(fileout):
 
     fout.close()
 
-def loadFiles():
+def convertDict2Matrix_mouse(fileout):
+
+	fout = open(fileout,'w')
+	fout.write("lncNamePrimary\texons_number\tGENCODE\tNONCODE\tlncRNAdb\n")
+
+	for key in dict_lncRNA:
+		arr=[0,0,0]
+		arr[dict_positions_mouse[dict_lncRNA[key][SOURCE]]] = 1
+		count_tr = dict_lncRNA[key][COUNT]
+		for (id, source) in dict_lncRNA[key][ALIAS]:
+		    arr[dict_positions_mouse[source]] = 1
+		fout.write(key + "\t" + str(count_tr) + "\t" + str(arr[0]) + "\t" + str(arr[1]) + "\t" + str(arr[2]) + "\n")
+
+	fout.close()
+
+
+
+def loadFiles_human():
+
+	################# human
 
     # load the actual number of exons per transcript
     print("load dictionaries - numbers of exons per transcript per database source")
@@ -163,5 +183,58 @@ def loadFiles():
         json.dump(dict_json, outfile, indent=4)
     outfile.close()
 
+def loadFiles_mouse():
+
+	# load the actual number of exons per transcript
+    print("load dictionaries - numbers of exons per transcript per database source")
+    dict_db[GENCODE] = readDictExons('gencode_mm10_short_exons.bed')
+    dict_db[NONCODE] = readDictExons('noncode_mm10_short_exons.bed')
+    dict_db[LNCRNADB] = readDictExons('lncrnadb_mm10_short_exons.bed')
+
+    # load overlaps for gencode
+    print("map gencode and other sources")
+    mapOverlaps('gencode_mm10_overlappAll_exons.bed',GENCODE)
+    print("map noncode and other sources")
+    mapOverlaps('noncode_mm10_overlappAll_exons.bed',NONCODE)
+    print("map lncrnadb and other sources")
+    mapOverlaps('lncrnadb_mm10_overlappAll_exons.bed',LNCRNADB)
+
+    # attach the rest of the
+    print("attach the rest")
+    for key in dict_db:
+        for key_id in dict_db[key]:
+            id  = key_id.split("@")[dict_index[key]]
+            if id in dict_lncRNA:
+                continue
+            if id in dict_visitedKeys:
+                continue
+
+            dict_lncRNA[id] = {}
+            dict_lncRNA[id][COUNT] = dict_db[key][key_id]
+            dict_lncRNA[id][ALIAS] = []
+            dict_lncRNA[id][SOURCE] = key
+
+    print("convert to matrix and print to file")
+    convertDict2Matrix_mouse("outOverlap_mm10.txt")
+
+    print("convert to db json")
+    dict_json=[]
+    count=0
+    for key in dict_lncRNA:
+        dict_aux={}
+        key_lnc = "LNC_MM10_" + str(count).zfill(6)
+        count += 1
+        dict_aux[key_lnc] = []
+        dict_aux[key_lnc].append({SOURCE:dict_lncRNA[key][SOURCE],ALIAS:key})
+        for (id,source) in dict_lncRNA[key][ALIAS]:
+            dict_aux[key_lnc].append({SOURCE:source,ALIAS:id})
+        dict_json.append(dict_aux)
+
+    with open("overlap_mm10.json", 'w') as outfile:
+        json.dump(dict_json, outfile, indent=4)
+    outfile.close()
+
+
 if __name__ == "__main__":
-    loadFiles()
+    # loadFiles_human()
+	loadFiles_mouse()
