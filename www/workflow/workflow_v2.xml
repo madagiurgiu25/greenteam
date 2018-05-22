@@ -196,9 +196,76 @@
         <input ref="expression1.expression1_out" />
         <output id="expression3_out" label="TCGA expression data" x="479" y="414" />
       </trans>
-      <trans id="expression4" owner="team" time="30h" ready="50" label="4. GEO data - differential expression analysis" x="912" y="254">
+      <trans id="expression4" owner="team" time="100h" ready="50" label="4. GEO data - differential expression analysis" x="912" y="254">
         <input ref="expression2.expression2_out" />
         <output id="expression4_out" label="Differential expression data" x="1386" y="251" />
+        <!-- ************************************* -->
+        <!-- 6.x Pipeline for expression data analysis -->
+        <!-- ************************************* -->
+        <workflow parentref="exprAtheroAndCancer">
+          <trans id="cutadapt" label="Adaptors masking (cutadapt)" owner="team" time="4h" ready="100" x="697" y="221">
+            <input label="fastq file" id="expr1_in" x="694" y="100" />
+            <output id="cutadapt_out" label="fastq masked" x="698" y="339" />
+          </trans>
+          <trans id="trimming" owner="team" time="4h" ready="90" label="Trimming reads by quality (Trimmomatic)" x="700" y="454">
+            <input ref="cutadapt.cutadapt_out" />
+            <output id="trimming_out" label="clean reads (fastq)" x="698" y="590" />
+            <output id="trimming_filtered_out" label="unpaired reads" x="1472" y="459" />
+          </trans>
+          <trans id="index_star" owner="team" time="2h" ready="90" label="STAR index builder - GRCh38" x="240" y="622">
+            <input label="GCRh38 assembly" x="223" y="497" />
+            <output id="index_star_out" label="STAR index" x="238" y="739" />
+          </trans>
+          <trans id="index_hisat2" owner="team" time="8h" ready="90" label="HISAT2 index builder - GRCh38" x="1170" y="669">
+            <input label="GRCh38 assembly" x="1162" y="562" />
+            <output id="index_hisat2_out" label="HISAT2 index" x="1180" y="779" />
+          </trans>
+          <trans id="mapping_star" owner="team" time="8h" ready="90" label="STAR mapping" x="453" y="829">
+            <input ref="index_star.index_star_out" />
+            <input ref="trimming.trimming_out" />
+            <output id="mapping_star_out" label="mapped reads (.bam)" x="449" y="998" />
+            <output id="mapping_star_filtered_out" label="unmapped reads (.fastq)" x="1442" y="923" />
+          </trans>
+          <trans id="mapping_hisat2" owner="team" time="8h" ready="90" label="Mapping HISAT2" x="842" y="832">
+            <input ref="index_hisat2.index_hisat2_out" />
+            <input ref="trimming.trimming_out" />
+            <output id="mapping_hisat2_out" label="mapped reads (.bam)" x="850" y="995" />
+            <output id="mapping_hisat2_filtered_out" label="unmapped reads (.fastq)" x="1445" y="1019" />
+          </trans>
+          <trans id="transcript_assembly_star" owner="team" time="4h" ready="90" label="Transcript assembly (StringTie)" x="448" y="1179">
+            <input ref="mapping_star.mapping_star_out" />
+            <output id="tr_ass_star_out" label="annotations (.gtf)" x="453" y="1289" />
+          </trans>
+          <trans id="transcript_assembly_hisat2" owner="team" time="4h" ready="90" label="Transcript assembly (StringTie)" x="863" y="1174">
+            <input ref="mapping_hisat2.mapping_hisat2_out" />
+            <output id="tr_ass_hisat2_out" label="annotations (.gtf)" x="868" y="1303" />
+          </trans>
+          <trans id="merge_assemblies" label="Merge transcripts" time="1h" ready="100" x="682" y="1439">
+            <input ref="transcript_assembly_hisat2.tr_ass_hisat2_out" />
+            <input ref="transcript_assembly_star.tr_ass_star_out" />
+            <input label="GRChg38.gtf" x="668" y="1319" />
+            <output id="merge_assemblies_out" label="Reference transcript set" x="676" y="1566" />
+          </trans>
+          <trans id="estimate_tr_star" owner="team" time="2h" ready="90" label="Estimate transcript abundance (StringTie)" x="100" y="1586">
+            <input ref="merge_assemblies.merge_assemblies_out" />
+            <input ref="mapping_star.mapping_star_out" />
+            <output id="estimate_tr_star_out" label="Raw counts" x="506" y="1729" />
+          </trans>
+          <trans id="estimate_tr_hisat2" owner="team" time="2h" ready="90" label="Estimate transcript abundance (StringTie)" x="1211" y="1571">
+            <input ref="merge_assemblies.merge_assemblies_out" />
+            <input ref="mapping_hisat2.mapping_hisat2_out" />
+            <output id="estimate_tr_hisat2_out" label="Raw counts" x="820" y="1724" />
+          </trans>
+          <trans id="denovo_assembly" label="De novo transcript assembly (Trinity)" time="8h" ready="0" x="1984" y="930">
+            <input ref="trimming.trimming_filtered_out" />
+            <input ref="mapping_hisat2.mapping_hisat2_filtered_out" />
+            <input ref="mapping_star.mapping_star_filtered_out" />
+          </trans>
+          <trans id="de_analysis" time="20h" ready="0" label="Gene and Transcript differential expression analysis" x="690" y="1867">
+            <input ref="estimate_tr_hisat2.estimate_tr_hisat2_out" />
+            <input ref="estimate_tr_star.estimate_tr_star_out" />
+          </trans>
+        </workflow>
       </trans>
       <trans id="expression5" owner="team" time="30h" ready="13" label="5. TCGA data - differential expression analysis" x="921" y="403">
         <input ref="expression3.expression3_out" />
