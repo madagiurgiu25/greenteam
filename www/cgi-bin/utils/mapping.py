@@ -90,8 +90,10 @@ if __name__ == "__main__":
         arr = l.split("\t")
         if str(arr[0]).startswith("#") == False:
             dict_mapping[arr[1]] = arr[0]
-    replaceKeyGTF("test.gtf",dict_mapping)
-
+    replaceKeyGTF("NONCODEv5_human_hg38_lncRNA.gtf",dict_mapping)
+    replaceKeyGTF("NONCODEv5_mouse_mm10_lncRNA.gtf",dict_mapping)
+    replaceKeyGTF("gencode.vM17.long_noncoding_RNAs.gtf",dict_mapping)
+    replaceKeyGTF("gencode.v28.long_noncoding_RNAs.gtf",dict_mapping)
     # insertPKinJSON("hg38_long_noncoding_gencode.json",dict_mapping)
     # insertPKinJSON("hg38_long_noncoding_noncode.json",dict_mapping)
     # insertPKinJSON("mm10_long_noncoding_gencode.json",dict_mapping)
