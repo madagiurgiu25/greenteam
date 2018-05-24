@@ -132,7 +132,7 @@ def parseRow2Gene(arr):
     return dict
 
 # extract from gft file format entry of gene_type x (miRNA, protein_coding, lincRNA)
-def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None):
+def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_transcript=None):
 
     bigDict = []
 
@@ -405,9 +405,13 @@ if __name__ == "__main__":
         bedfile = sys.argv[4]
         jsonfile = sys.argv[5]
 
-        if len(sys.argv) == 7:
+        if len(sys.argv) >= 7:
             type = sys.argv[6]
-            ########### parse GTF file to BED and json with type
-            parseGTF(file,bedfile,jsonfile,assembly,source,type)
+            if len(sys.argv) ==8:
+                type_transcript = sys.argv[7]
+                ########### parse GTF file to BED and json with type
+                parseGTF(file,bedfile,jsonfile,assembly,source,type,type_transcript)
+            else:
+                parseGTF(file,bedfile,jsonfile,assembly,source,type)
         else:
             parseGTF(file,bedfile,jsonfile,assembly,source)

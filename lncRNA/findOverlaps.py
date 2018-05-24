@@ -55,7 +55,7 @@ def mapOverlaps(filename,primary_source):
             source = arr[2]
             id2 = arr[3].strip()
 
-			_id1 = id1.split("@")[dict_index[primary_source]]
+		    _id1 = id1.split("@")[dict_index[primary_source]]
 			_id2 = id2.split("@")[dict_index[source]]
 
             # print("Exons=" + countExons + "\t" + dict_db[primary_source][id1] + "\t" + _id1 + "\t" + dict_db[source][id2] + "\t" + _id2)
