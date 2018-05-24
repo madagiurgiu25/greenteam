@@ -1,5 +1,0 @@
-param	value
-cmd_line	/home/proj/biosoft/software/cufflinks-2.2.1.Linux_x86_64/cuffdiff -o /home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Cuffdiff/MAOEC/ -p 5 -c 5 -v --library-type fr-firststrand /home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/expression_analysis/genome_mm10/merged_mm10_sorted.gtf /home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/STAR/MAOECA5/star_sorted.bam /home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/STAR/MAOECB5/star_sorted.bam 
-version	2.2.1
-SVN_revision	4237
-boost_version	104700
