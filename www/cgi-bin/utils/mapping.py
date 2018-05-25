@@ -80,22 +80,82 @@ def replaceKeyGTF(gtf,mapObj):
     except FileNotFoundError:
         print("your file does not exist")
 
+def extractFPKM_TPM():
+    pass
+
+def addGeneEntrie(gtf):
+
+    list_trascript_start_stop = []
+    current_gene_id = ""
+    current_strand = ""
+    current_chr = ""
+    try:
+        fout=open(gtf + "_withgenes", "w")
+        with open(gtf, "r") as f:
+            for line in f:
+                fout.write(line)
+                if line.startswith("#"):
+                    continue
+                else:
+                    arr = line.strip().replace("\n","").split("\t")
+                    if arr[2] != 'transcript':
+                        continue
+                    # check if transcript on same gene and save start stop
+                    info_row = arr[8]
+                    start = arr[3]
+                    stop = arr[4]
+                    info_arr = info_row.replace("\"","").split(";")
+                    for item in info_arr:
+                        if len(item.strip())>0:
+                            (key,val) = item.strip().split(" ")
+                            if key  == "gene_id":
+                                if val == current_gene_id: # means that transcript its on the same gene
+                                    list_trascript_start_stop.append(start)
+                                    list_trascript_start_stop.append(stop)
+                                    current_strand = arr[6]
+                                    current_chr = arr[0]
+                                else:
+                                    if len(current_gene_id) > 0:
+                                        max_stop = max(list_trascript_start_stop)
+                                        min_start = min(list_trascript_start_stop)
+
+                                        fout.write(("{0}\tCufflinks\tgene\t{1}\t{2}\t0\t{3}\t.\tgene_id \"{4}\";\n").format(current_chr,min_start,max_stop,current_strand,current_gene_id))
+
+                                    list_trascript_start_stop = []
+                                    list_trascript_start_stop.append(start)
+                                    list_trascript_start_stop.append(stop)
+                                    current_gene_id = val
+                                    current_strand = arr[6]
+                                    current_chr = arr[0]
+
+            if len(current_gene_id) > 0:
+                max_stop = max(list_trascript_start_stop)
+                min_start = min(list_trascript_start_stop)
+
+                fout.write(("{0}\tCufflinks\tgene\t{1}\t{2}\t0\t{3}\t.\tgene_id \"{4}\";\n").format(current_chr,min_start,max_stop,current_strand,current_gene_id))
+            fout.close()
+
+    except FileNotFoundError:
+        print("your file does not exist")
 
 if __name__ == "__main__":
+
+    ################ Assgin unique keys #####################
     # asignUniqueKeys()
 
-    fin = open("mapping_keys.txt","r").readlines()
-    dict_mapping = {}
-    for l in fin:
-        arr = l.split("\t")
-        if str(arr[0]).startswith("#") == False:
-            dict_mapping[arr[1]] = arr[0]
-    replaceKeyGTF("NONCODEv5_human_hg38_lncRNA.gtf",dict_mapping)
-    replaceKeyGTF("NONCODEv5_mouse_mm10_lncRNA.gtf",dict_mapping)
-    replaceKeyGTF("gencode.vM17.long_noncoding_RNAs.gtf",dict_mapping)
-    replaceKeyGTF("gencode.v28.long_noncoding_RNAs.gtf",dict_mapping)
-    # insertPKinJSON("hg38_long_noncoding_gencode.json",dict_mapping)
-    # insertPKinJSON("hg38_long_noncoding_noncode.json",dict_mapping)
-    # insertPKinJSON("mm10_long_noncoding_gencode.json",dict_mapping)
-    # insertPKinJSON("mm10_long_noncoding_noncode.json",dict_mapping)
+    ################ Mapping keyes #####################
+    # fin = open("mapping_keys.txt","r").readlines()
+    # dict_mapping = {}
+    # for l in fin:
+    #     arr = l.split("\t")
+    #     if str(arr[0]).startswith("#") == False:
+    #         dict_mapping[arr[1]] = arr[0]
+    # replaceKeyGTF("NONCODEv5_human_hg38_lncRNA.gtf",dict_mapping)
+    # replaceKeyGTF("NONCODEv5_mouse_mm10_lncRNA.gtf",dict_mapping)
+    # replaceKeyGTF("gencode.vM17.long_noncoding_RNAs.gtf",dict_mapping)
+    # replaceKeyGTF("gencode.v28.long_noncoding_RNAs.gtf",dict_mapping)
+
+
+    ################ Add gene entries #####################
+    addGeneEntrie("NONCODEv5_mouse_mm10_lncRNA.gtf")
 
