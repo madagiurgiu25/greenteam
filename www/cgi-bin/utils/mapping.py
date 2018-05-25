@@ -93,12 +93,14 @@ def addGeneEntrie(gtf):
         fout=open(gtf + "_withgenes", "w")
         with open(gtf, "r") as f:
             for line in f:
-                fout.write(line)
+
                 if line.startswith("#"):
+                    fout.write(line)
                     continue
                 else:
                     arr = line.strip().replace("\n","").split("\t")
                     if arr[2] != 'transcript':
+                        fout.write(line)
                         continue
                     # check if transcript on same gene and save start stop
                     info_row = arr[8]
@@ -127,6 +129,7 @@ def addGeneEntrie(gtf):
                                     current_gene_id = val
                                     current_strand = arr[6]
                                     current_chr = arr[0]
+                    fout.write(line)
 
             if len(current_gene_id) > 0:
                 max_stop = max(list_trascript_start_stop)
@@ -152,10 +155,10 @@ if __name__ == "__main__":
     #         dict_mapping[arr[1]] = arr[0]
     # replaceKeyGTF("NONCODEv5_human_hg38_lncRNA.gtf",dict_mapping)
     # replaceKeyGTF("NONCODEv5_mouse_mm10_lncRNA.gtf",dict_mapping)
-    # replaceKeyGTF("gencode.vM17.long_noncoding_RNAs.gtf",dict_mapping)
-    # replaceKeyGTF("gencode.v28.long_noncoding_RNAs.gtf",dict_mapping)
+    replaceKeyGTF("gencode.vM17.long_noncoding_RNAs.gtf_withgenes",dict_mapping)
+    replaceKeyGTF("gencode.v28.long_noncoding_RNAs.gtf_withgenes",dict_mapping)
 
 
     ################ Add gene entries #####################
-    addGeneEntrie("NONCODEv5_mouse_mm10_lncRNA.gtf")
-
+    # addGeneEntrie("NONCODEv5_mouse_mm10_lncRNA.gtf")
+    # addGeneEntrie("NONCODEv5_human_hg38_lncRNA.gtf")
