@@ -147,12 +147,12 @@ if __name__ == "__main__":
     # asignUniqueKeys()
 
     ################ Mapping keyes #####################
-    # fin = open("mapping_keys.txt","r").readlines()
-    # dict_mapping = {}
-    # for l in fin:
-    #     arr = l.split("\t")
-    #     if str(arr[0]).startswith("#") == False:
-    #         dict_mapping[arr[1]] = arr[0]
+    fin = open("mapping_keys.txt","r").readlines()
+    dict_mapping = {}
+    for l in fin:
+        arr = l.split("\t")
+        if str(arr[0]).startswith("#") == False:
+            dict_mapping[arr[1]] = arr[0]
     # replaceKeyGTF("NONCODEv5_human_hg38_lncRNA.gtf",dict_mapping)
     # replaceKeyGTF("NONCODEv5_mouse_mm10_lncRNA.gtf",dict_mapping)
     replaceKeyGTF("gencode.vM17.long_noncoding_RNAs.gtf_withgenes",dict_mapping)
