@@ -145,11 +145,12 @@ def addGeneEntrie(gtf):
 if __name__ == "__main__":
 
     ################ Assgin unique keys #####################
-    asignUniqueKeys()
+    #asignUniqueKeys()
 
     ################ Add gene entries #####################
     # addGeneEntrie("NONCODEv5_mouse_mm10_lncRNA.gtf")
     # addGeneEntrie("NONCODEv5_human_hg38_lncRNA.gtf")
+    addGeneEntrie("lncrnadb_mm10.gtf")
 
 
     ################ Mapping keyes #####################
@@ -159,9 +160,9 @@ if __name__ == "__main__":
         arr = l.split("\t")
         if str(arr[0]).startswith("#") == False:
             dict_mapping[arr[1]] = arr[0]
-    replaceKeyGTF("NONCODEv5_human_hg38_lncRNA.gtf_withgenes",dict_mapping)
-    replaceKeyGTF("NONCODEv5_mouse_mm10_lncRNA.gtf_withgenes",dict_mapping)
+    replaceKeyGTF("lncrnadb_mm10.gtf_withgenes",dict_mapping)
+    #replaceKeyGTF("NONCODEv5_mouse_mm10_lncRNA.gtf_withgenes",dict_mapping)
 
-    replaceKeyGTF("gencode.vM17.long_noncoding_RNAs.gtf",dict_mapping)
-    replaceKeyGTF("gencode.v28.long_noncoding_RNAs.gtf",dict_mapping)
+    #replaceKeyGTF("gencode.vM17.long_noncoding_RNAs.gtf",dict_mapping)
+    #replaceKeyGTF("gencode.v28.long_noncoding_RNAs.gtf",dict_mapping)
 

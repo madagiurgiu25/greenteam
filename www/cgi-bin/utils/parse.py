@@ -151,7 +151,7 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
 
                     # parse the info string in the entry
                     infoDict = infoString2Dict(arr[8])
-                    print(infoDic)
+                    print(infoDict)
 
                     # filter for gene type
                     if type is not None and GENE_TYPE not in infoDict:
