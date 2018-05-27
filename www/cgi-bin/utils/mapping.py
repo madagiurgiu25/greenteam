@@ -104,8 +104,8 @@ def addGeneEntrie(gtf):
                         continue
                     # check if transcript on same gene and save start stop
                     info_row = arr[8]
-                    start = arr[3]
-                    stop = arr[4]
+                    start = int(arr[3])
+                    stop = int(arr[4])
                     info_arr = info_row.replace("\"","").split(";")
                     for item in info_arr:
                         if len(item.strip())>0:
@@ -117,7 +117,7 @@ def addGeneEntrie(gtf):
                                     current_strand = arr[6]
                                     current_chr = arr[0]
                                 else:
-                                    if len(current_gene_id) > 0:
+                                    if len(current_gene_id) > 0: # do i have already a gene in memory
                                         max_stop = max(list_trascript_start_stop)
                                         min_start = min(list_trascript_start_stop)
 
@@ -129,6 +129,7 @@ def addGeneEntrie(gtf):
                                     current_gene_id = val
                                     current_strand = arr[6]
                                     current_chr = arr[0]
+                                break
                     fout.write(line)
 
             if len(current_gene_id) > 0:
@@ -146,6 +147,10 @@ if __name__ == "__main__":
     ################ Assgin unique keys #####################
     # asignUniqueKeys()
 
+    ################ Add gene entries #####################
+    addGeneEntrie("NONCODEv5_mouse_mm10_lncRNA.gtf")
+    addGeneEntrie("NONCODEv5_human_hg38_lncRNA.gtf")
+
     ################ Mapping keyes #####################
     fin = open("mapping_keys.txt","r").readlines()
     dict_mapping = {}
@@ -158,7 +163,3 @@ if __name__ == "__main__":
     # replaceKeyGTF("gencode.vM17.long_noncoding_RNAs.gtf",dict_mapping)
     # replaceKeyGTF("gencode.v28.long_noncoding_RNAs.gtf",dict_mapping)
 
-
-    ################ Add gene entries #####################
-    # addGeneEntrie("NONCODEv5_mouse_mm10_lncRNA.gtf")
-    # addGeneEntrie("NONCODEv5_human_hg38_lncRNA.gtf")
