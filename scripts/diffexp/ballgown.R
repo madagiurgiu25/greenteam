@@ -7,25 +7,16 @@ library(plyr)
 set.seed(1234)
 
 # read samples into R
-data_directory = ('/Users/Diana/Desktop/greenteam/dataBallgown')
+data_directory = ('/Users/Diana/Desktop/dataBallgown')
 sample_IDs = list.dirs(path = data_directory, full.names = FALSE, recursive = FALSE)
 sample_IDs <- sample_IDs[ grepl("^Mlet7", sample_IDs) ]
 sample_paths = paste(data_directory, sample_IDs, sep="/")
 bg = ballgown(samples=sample_paths, meas='all')
 
-# access exon structure e_data
-structure(bg)$exon
-# access intron structure i_data
-structure(bg)$intron
-# access transcript structure t_data
-structure(bg)$trans
-
-plotTranscripts('NONMMUG034479.2', bg, samples=sample_IDs, meas='FPKM', colorby='transcript')
-
 pData(bg) = data.frame(id=sampleNames(bg), group=rep(1:0, c(7,7))) # first 4 samples = 1, last 4 samples = 0
 phenotype_table = pData(bg)
 stat_results = stattest(bg, feature='transcript', meas='FPKM', covariate='group', getFC=TRUE)
-head(stat_results)
+#head(stat_results)
 
 # Filter to remove low-abundance genes
 bg_filtered = subset(bg,"rowVars(texpr(bg)) >1",genomesubset=TRUE)
@@ -48,6 +39,9 @@ results_genes = arrange(results_genes, pval)
 head(results_genes, 20)
 head(results_transcripts, 20)
 
+write.table(results_genes, file="Mlet7_result_genes.txt", quote=F)
+write.table(results_transcripts, file="Mlet7_result_transcripts.txt", quote=F)
+
 tropical= c('darkorange', 'dodgerblue','hotpink', 'limegreen', 'yellow')
 palette(tropical)
 
@@ -56,27 +50,9 @@ fpkm = texpr(bg_filtered, meas="FPKM")
 fpkm = log2(fpkm+1)
 boxplot(fpkm, col=as.numeric(phenotype_table$group), las=2, ylab='log2(FPKM+1)', main="Distribution of gene abundances across samples")
 
-# Make plots of individual transcripts across samples
-myTranscript <- ballgown::transcriptNames(bg_filtered)[2]
-myGene <- ballgown::geneNames(bg_filtered)[2]
-plot(fpkm[2,] ~ phenotype_table$group, border=c(1,2), main=paste(myGene,' : ',myTranscript),pch=19, xlab="Group", ylab='log2(FPKM+1)')
-points(fpkm[12,] ~ jitter(as.numeric(pheno_data$sex)),
-        col=as.numeric(pheno_data$sex))
+# Plot the structure and expression levels in a sample of all transcripts that share the same gene locus.
+plotMeans('ENSMUSG00000035696.15', bg_filtered, groupvar="group",legend=TRUE)
 
 # Identify transcripts and genes with a q value <0.05
 subset(results_transcripts,results_transcripts$qval<0.05)
 subset(results_genes,results_genes$qval<0.05)
-
-# View the distribution of differential expression values as a histogram. Display only those that are significant according to Ballgown
-sig = which(results_genes$pval<0.05)
-results_genes[,"de"] = log2(results_genes[,"fc"])
-hist(results_genes[sig,"de"], breaks=50, col="seagreen", main="Distribution of differential expression values")
-abline(v=-2, col="black", lwd=2, lty=2)
-abline(v=2, col="black", lwd=2, lty=2)
-hist(results_genes[sig,"de"], breaks=50,  main="Distribution of differential expression values", col=as.numeric(phenotype_table$group), las=2)
-
-# Plot the structure and expression levels in a sample of all transcripts that share the same gene locus.
-plotMeans('ENSMUSG00000035696.15', bg_filtered, groupvar="group",legend=TRUE)
-
-plotTranscripts(ballgown::geneIDs(bg_filtered)[1729], bg_filtered, main=c('Gene XIST in sample ERR188234'), sample=c('ERR188234'))
-
