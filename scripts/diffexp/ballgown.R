@@ -7,13 +7,13 @@ library(plyr)
 set.seed(1234)
 
 # read samples into R
-data_directory = ('/Users/Diana/Desktop/dataBallgown')
+data_directory = ('/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown')
 sample_IDs = list.dirs(path = data_directory, full.names = FALSE, recursive = FALSE)
-sample_IDs <- sample_IDs[ grepl("^Mlet7", sample_IDs) ]
+sample_IDs <- sample_IDs[ grepl("^M103", sample_IDs) ]
 sample_paths = paste(data_directory, sample_IDs, sep="/")
 bg = ballgown(samples=sample_paths, meas='all')
 
-pData(bg) = data.frame(id=sampleNames(bg), group=rep(1:0, c(7,7))) # first 4 samples = 1, last 4 samples = 0
+pData(bg) = data.frame(id=sampleNames(bg), group=rep(1:0, c(4,4))) # first 4 samples = 1, last 4 samples = 0
 phenotype_table = pData(bg)
 stat_results = stattest(bg, feature='transcript', meas='FPKM', covariate='group', getFC=TRUE)
 #head(stat_results)
@@ -39,8 +39,8 @@ results_genes = arrange(results_genes, pval)
 head(results_genes, 20)
 head(results_transcripts, 20)
 
-write.table(results_genes, file="Mlet7_result_genes.txt", quote=F)
-write.table(results_transcripts, file="Mlet7_result_transcripts.txt", quote=F)
+write.table(results_genes, file="M103_result_genes_new2.txt", quote=F, sep="\t", row.names = FALSE)
+write.table(results_transcripts, file="M103_result_transcripts_new2.txt", quote=F, sep="\t", row.names = FALSE)
 
 tropical= c('darkorange', 'dodgerblue','hotpink', 'limegreen', 'yellow')
 palette(tropical)
