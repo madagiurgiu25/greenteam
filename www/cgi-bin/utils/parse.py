@@ -144,14 +144,15 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
     try:
         with open(gtffile, "r") as f:
             for line in f:
-                # count += 1
+                count += 1
+                print(count)
                 # print(count)
                 if line.startswith("#") is False: # ignore header lines
                     arr = line.strip("\n").replace('"',"").split("\t")
 
                     # parse the info string in the entry
                     infoDict = infoString2Dict(arr[8])
-                    print(infoDict)
+                    #print(infoDict)
 
                     # filter for gene type
                     if type is not None and GENE_TYPE not in infoDict:

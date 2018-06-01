@@ -95,8 +95,7 @@ giurgiu@bioclient10:/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding
 
 ------------------------------------------- new ballgown ---------------------------------------------
 
-
-
+setwd("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown")
 library(ballgown)
 library(ggplot2)
 library(gplots)
@@ -347,8 +346,6 @@ tmp_dir = paste(data_stringtie, sample_IDs, "gene_abundance.tab", sep="/")
 transcript_expression = texpr(bg)
 
 
-
-
 ######## statistical test with FPKM > 1
 
 	fi=row.names(subset(df_genes_expression, df_genes_expression$filterOne == TRUE & df_genes_expression$filterInfinite == TRUE))
@@ -548,10 +545,178 @@ dim(results_genes)
 
 
 
+########################### new filtering + clustering
+sample="M103"
+size=5
+
+# read samples into R
+data_directory = ('/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown')
+sample_IDs = list.dirs(path = data_directory, full.names = FALSE, recursive = FALSE)
+sample_IDs <- sample_IDs[ grepl(paste("^",sample,sep=""), sample_IDs) ]
+print(sample_IDs)
+sample_paths = paste(data_directory, sample_IDs, sep="/")
+
+
+# bam files
+data_directory_bam = ('/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/STAR')
+bam_paths = paste(data_directory_bam, sample_IDs, "star_sorted.bam", sep="/")
+
+
+# create ballgown object
+bg = ballgown(samples=sample_paths, bamfiles=bam_paths, meas='all')
+
+# get annotation
+#anno_path = ('/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/data/mapping/mm10_primary_assembly_and_lncRNA.gtf')
+#annot = gffReadGR(anno_path, splitByTranscript=TRUE)
+#info = annotate_assembly(assembled=structure(bg)$trans, annotated=annot)
+
+# design matrix
+pData(bg) = data.frame(id=sampleNames(bg), group=factor(rep(2:1, c(size,size))))
+pData(bg) 
+# mark the matched paired
+matched_pair= factor(rep(1:size,2))
+matched_pair
+mod = model.matrix(~matched_pair + pData(bg)$group)
+mod0 = model.matrix(~ pData(bg)$group)
+
+# get GENE EXPRESSION level
+expression_genes = gexpr(bg)
+l<-cbind(t_id=texpr(bg, 'all')$t_name,gene_id=texpr(bg, 'all')$gene_id)
+write.table(l,file="count_transcripts_per_gene.txt",sep="\t",quote=F,row.names=F)
+
+#filter my gene expression
+df_genes_expression = data.frame(expression_genes)
+
+# all FPKM > 1
+fone=filterOne(expression_genes)
+df_genes_expression$filterOne=fone
+dim(df_genes_expression[df_genes_expression$filterOne == TRUE,])
+
+# all FPKM > 0
+fone=filterZero(expression_genes)
+df_genes_expression$filterZero=fone
+dim(df_genes_expression[df_genes_expression$filterZero== TRUE,])
+
+
+##############################################################################################################
+##############################################################################################################
+################################################### CLUSTERING ###############################################
+##############################################################################################################
+##############################################################################################################
 
 
 
+count_t_per_gene <- read.csv2("count_transcripts_per_gene_freq.txt", sep="\t", header=F)
+df_transcript2_per_gene <- data.frame(frequency=as.numeric(as.character(count_t_per_gene[,1])), gene=count_t_per_gene[,2], type=count_t_per_gene[,3])
 
+
+
+# find genes that need to cluster
+df_genes2cluster=subset(df_transcript2_per_gene, df_transcript2_per_gene$frequency > 8 )
+list_genes2cluster=as.character(df_genes2cluster$gene)
+
+# get empty format
+df <- texpr(bg)
+df <- df[df[,1] > 100000,]
+mapping<-data.frame(cluster=integer(),
+                    t_id=integer(), 
+                    geneID=character(), 
+                    stringsAsFactors=FALSE)
+# cluster genes
+for (i in 1:length(list_genes2cluster)){
+  gene<-list_genes2cluster[i]
+  print(gene)
+  obj <- collapseTranscripts(gene, bg, meas = "FPKM", method = c("hclust"), k = 4)
+  
+  # add cluster mapping
+  mapping <- rbind(mapping, data.frame(cluster=obj$cl$clusters$cluster, t_id=obj$cl$clusters$t_id, geneID=rep(gene,dim(obj$cl$clusters)[1])))
+  
+  # add fpkm to matrix
+  collapsed_transcripts <- obj$tab
+  feature<- paste("CLUST", gene, row.names(collapsed_transcripts), sep="_")
+  row.names(collapsed_transcripts) <- feature
+  df<-rbind(df, collapsed_transcripts)
+
+}
+
+write.table(df,"cluster_tr_8_k_4_M103.txt",sep="\t",row.names=F,quote=F)
+
+# bind FPKMs from other genes that do not 
+df_genes=subset(df_transcript2_per_gene, df_transcript2_per_gene$frequency <= 4 )
+list_genes=as.character(df_genes$gene)
+bg_filter = subset(bg,"ballgown::geneIDs(bg) %in% list_genes",genomesubset=TRUE)
+expression_matrix = texpr(bg_filter)
+row.names(expression_matrix) <- transcriptNames(bg_filter)
+df <- rbind(df, expression_matrix)  
+  
+# filter matrix with clustered transcripts
+df = data.frame(df)
+
+# filtering FPKM > 1
+df_filtered = subset(df, filterOne(df) == TRUE)
+colnames(df_filtered) <- as.character(pData(bg)$id)
+adjusted_results = stattest(gowntable = df_filtered, pData=pData(bg), feature='transcript', meas='FPKM', mod0=mod0, mod=mod)
+results_transcript <- arrange(adjusted_results, qval)
+
+
+#################################################### GET MANUALLY THE GENE EXPRESSION & TRANSCRIPT EXPRESSION
+
+############## read gene expression from file
+dir=("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/StringTie")
+sample_IDs = list.dirs(path = dir, full.names = FALSE, recursive = FALSE)
+sample_IDs <- sample_IDs[ grepl("^M103", sample_IDs) ]
+sample_paths = paste(dir,"/", sample_IDs, "/", sample_IDs, "_geneabundance.tab", sep="")
+
+geneIDs_local <- NULL
+df <- data.frame(sampleID=character(),
+              geneID=character(),
+              cov=double(),
+              FPKM=double(), 
+              TPM=double(), 
+              stringsAsFactors=FALSE)
+
+for (i in 1:length(sample_paths)){
+  aux <- read.csv2(file=sample_paths[i], sep="\t", header=T)
+  df<- rbind(df,data.frame(
+                  sampleID=as.character(rep(sample_IDs[i]),dim(aux)[1]),
+                  geneID=as.character(aux[,1]),
+                  cov=as.numeric(as.character(aux[,7])),
+                  FPKM=as.numeric(as.character(aux[,8])),
+                  TPM=as.numeric(as.character(aux[,9]))))
+  
+  print(dim(aux)[1])
+  if (is.null(geneIDs_local)){
+    geneIDs_local <-  c(as.character(aux[,1]))
+  }else{
+    geneIDs_new <-  c(geneIDs_local,c(as.character(aux[,1])))
+    geneIDs_local <- geneIDs_new
+  }
+  geneIDs_local <- unique(geneIDs_local)
+}
+
+geneIDs_local <- unique(geneIDs_local)
+
+########### GET FPKM
+fpkm_matrix <- data.frame(geneID=geneIDs_local)
+
+
+for (i in 1:length(sample_IDs)){
+  replicate<- subset(df, df$sampleID == sample_IDs[i])
+  colname<-sample_IDs[i]
+  filter_replicate <- data.frame(replicate$FPKM,geneID=replicate$geneID)
+  # left join
+  fpkm_matrix<-left_join(x=fpkm_matrix, y=filter_replicate , by="geneID",all.x=TRUE,all.y=TRUE)
+  colnames(fpkm_matrix)[i+1] <- colname
+}
+
+fpkm_matrix<-unique(fpkm_matrix[,1:dim(fpkm_matrix)[2]])
+
+df_aux<-fpkm_matrix[,2:dim(fpkm_matrix)[2]]
+row.names(df_aux) <- c(as.character(fpkm_matrix$geneID))
+df_filtered = subset(df_aux,filterOne(df_aux) == TRUE)
+colnames(df_filtered) <- as.character(pData(bg)$id)
+adjusted_results < stattest(gowntable = df_filtered, pData=pData(bg), feature='gene', meas='FPKM', mod0=mod0, mod=mod)
+results_transcript <- arrange(adjusted_results, qval)
 
 
 
