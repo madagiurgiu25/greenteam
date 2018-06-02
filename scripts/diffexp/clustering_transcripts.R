@@ -1,7 +1,5 @@
 setwd("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown")
 library(ballgown)
-library(ggplot2)
-library(gplots)
 library(genefilter)
 library(GenomicRanges)
 library(plyr)
