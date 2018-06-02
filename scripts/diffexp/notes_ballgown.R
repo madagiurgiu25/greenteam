@@ -620,26 +620,41 @@ df <- texpr(bg)
 df <- df[df[,1] > 100000,]
 mapping<-data.frame(cluster=integer(),
                     t_id=integer(), 
+                    t_name=character(),
                     geneID=character(), 
                     stringsAsFactors=FALSE)
+
+count = 0
 # cluster genes
-for (i in 1:length(list_genes2cluster)){
+#for (i in 1:length(list_genes2cluster)){
+for (i in 1:5){
+  print(count)
+  count = count + 1
+
   gene<-list_genes2cluster[i]
   print(gene)
+  
   obj <- collapseTranscripts(gene, bg, meas = "FPKM", method = c("hclust"), k = 4)
   
-  # add cluster mapping
-  mapping <- rbind(mapping, data.frame(cluster=obj$cl$clusters$cluster, t_id=obj$cl$clusters$t_id, geneID=rep(gene,dim(obj$cl$clusters)[1])))
-  
-  # add fpkm to matrix
+  #####3 add fpkm to matrix
   collapsed_transcripts <- obj$tab
-  feature<- paste("CLUST", gene, row.names(collapsed_transcripts), sep="_")
-  row.names(collapsed_transcripts) <- feature
+  df_feature<- data.frame(cluster=c(paste("CLUST", gene, row.names(collapsed_transcripts), sep="_")))
+  row.names(collapsed_transcripts) <- df_feature$cluster
   df<-rbind(df, collapsed_transcripts)
+  
+  
+  ###### add cluster mapping
+  transcripts<-data.frame(t_id=texpr(bg, 'all')$t_id, t_name=texpr(bg, 'all')$t_name)
+  clust_assign <- df_feature[match(obj$cl$cluster$cluster,row.names(df_feature)),]
+  clusters<- data.frame(t_id=obj$cl$clusters$t_id, geneID=rep(gene,dim(obj$cl$clusters)[1]),clusterName=clust_assign)
+  # inner join
+  merging<-merge(x=transcripts,y=clusters)
+  mapping <- rbind(mapping,merging)
+  
 
 }
 
-write.table(df,"cluster_tr_8_k_4_M103.txt",sep="\t",row.names=F,quote=F)
+write.table(df,"cluster_tr_8_k_4_M103.txt",sep="\t",row.names=T,quote=F)
 
 # bind FPKMs from other genes that do not 
 df_genes=subset(df_transcript2_per_gene, df_transcript2_per_gene$frequency <= 4 )
