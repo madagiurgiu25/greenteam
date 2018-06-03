@@ -20,30 +20,29 @@ def findOverlaps(file1, file2=None):
         try:
             with open(file1, 'r') as f:
                 dict_genes = json.load(f)
-                for gene in dict_genes:
+                for index, gene in enumerate(dict_genes):
                     print(count)
                     count = count + 1
                     gene_1=gene["gene_id"]
                     visited.append(gene_1)
-                    for gene_aux in dict_genes:
+                    for index_2, gene_aux in enumerate(dict_genes[index+1:]):
                         gene_2=gene_aux["gene_id"]
-                        if gene_1 != gene_2 and gene_2 not in visited:
-                            if gene["chr"] == gene_aux["chr"]:
-                                overlap = getOverlap([int(gene["start"]),int(gene["stop"])],[int(gene_aux["start"]),int(gene_aux["stop"])])
-                                if overlap > 0:
-                                    print(gene_1 + "\t" + gene_2 + "\t" + str(overlap))
-                                    gene_1_overlap=round((float)(overlap+1)/(int(gene["stop"])-int(gene["start"]) +1),4)
-                                    gene_2_overlap=round((float)(overlap+1)/(int(gene_aux["stop"])-int(gene_aux["start"]) +1),4)
-                                    overlap_len = overlap +1
-                                    fout.write(gene_1 + "\t" + gene['strand'] + "\t" + gene_2 + "\t" + gene_aux["strand"] + "\t" + str(overlap_len) + "\t" + str(gene_1_overlap) + "\t" + str(gene_2_overlap) + "\n")
-                                    # fout.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n").format(gene_1,
-                                    #                                                gene["strand"],
-                                    #                                                gene_2,
-                                    #                                                gene_aux["strand"],
-                                    #                                                str(overlap),
-                                    #                                                str(gene_1_overlap),
-                                    #                                                str(gene_2_overlap)
-                                    #                                                )
+                        if gene["chr"] == gene_aux["chr"]:
+                            overlap = getOverlap([int(gene["start"]),int(gene["stop"])],[int(gene_aux["start"]),int(gene_aux["stop"])])
+                            if overlap > 0:
+                                print(gene_1 + "\t" + gene_2 + "\t" + str(overlap))
+                                gene_1_overlap=round((float)(overlap+1)/(int(gene["stop"])-int(gene["start"]) +1),4)
+                                gene_2_overlap=round((float)(overlap+1)/(int(gene_aux["stop"])-int(gene_aux["start"]) +1),4)
+                                overlap_len = overlap +1
+                                fout.write(gene_1 + "\t" + gene['strand'] + "\t" + gene_2 + "\t" + gene_aux["strand"] + "\t" + str(overlap_len) + "\t" + str(gene_1_overlap) + "\t" + str(gene_2_overlap) + "\n")
+                                # fout.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n").format(gene_1,
+                                #                                                gene["strand"],
+                                #                                                gene_2,
+                                #                                                gene_aux["strand"],
+                                #                                                str(overlap),
+                                #                                                str(gene_1_overlap),
+                                #                                                str(gene_2_overlap)
+                                #                                                )
 
 
         except FileNotFoundError:
