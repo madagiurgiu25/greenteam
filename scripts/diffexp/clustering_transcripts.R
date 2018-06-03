@@ -171,5 +171,5 @@ for (i in 1:length(list_genes2cluster)){
     
 }
 setwd("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown/Clustering")
-write.table(df,paste(sample,"cluster_tr", transcript_per_gene_treshhold ,"k", k_clusters, ".txt",sep="_"),sep="\t",row.names=T,quote=F)
-write.table(mapping,paste(sample,"cluster_tr", transcript_per_gene_treshhold ,"k", k_clusters, "_mapping.txt",sep="_"),sep="\t",row.names=F,quote=F)
+write.table(df,paste(sample,"cluster_tr", transcript_per_gene_treshhold ,"k", k_clusters, "fpkm.txt",sep="_"),sep="\t",row.names=T,quote=F)
+write.table(mapping,paste(sample,"cluster_tr", transcript_per_gene_treshhold ,"k", k_clusters, "mapping.txt",sep="_"),sep="\t",row.names=F,quote=F)
