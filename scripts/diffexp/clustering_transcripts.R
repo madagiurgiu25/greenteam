@@ -143,8 +143,8 @@ mapping<-data.frame(cluster=integer(),
 
 count = 0
 # cluster genes
-#for (i in 1:length(list_genes2cluster)){
-for (i in 1:5){
+for (i in 1:length(list_genes2cluster)){
+#for (i in 1:5){
     print(count)
     count = count + 1
     
