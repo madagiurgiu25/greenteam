@@ -6,7 +6,7 @@ __author__ = 'Mada'
 import json
 
 def getOverlap(a, b):
-    return max(0, min(a[1], b[1]) - max(a[0], b[0]))+1
+    return max(0, min(a[1], b[1]) - max(a[0], b[0]))
 
 # require json files
 def findOverlaps(file1, file2=None):
@@ -34,15 +34,16 @@ def findOverlaps(file1, file2=None):
                                     print(gene_1 + "\t" + gene_2 + "\t" + str(overlap))
                                     gene_1_overlap=round((float)(overlap+1)/(int(gene["stop"])-int(gene["start"]) +1),4)
                                     gene_2_overlap=round((float)(overlap+1)/(int(gene_aux["stop"])-int(gene_aux["start"]) +1),4)
-
-                                    fout.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n").format(gene_1,
-                                                                                   gene["strand"],
-                                                                                   gene_2,
-                                                                                   gene_aux["strand"],
-                                                                                   str(overlap),
-                                                                                   str(gene_1_overlap),
-                                                                                   str(gene_2_overlap)
-                                                                                   )
+                                    overlap_len = overlap +1
+                                    fout.write(gene_1 + "\t" + gene['strand'] + "\t" + gene_2 + "\t" + gene_aux["strand"] + "\t" + str(overlap_len) + "\t" + str(gene_1_overlap) + "\t" + str(gene_2_overlap) + "\n")
+                                    # fout.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n").format(gene_1,
+                                    #                                                gene["strand"],
+                                    #                                                gene_2,
+                                    #                                                gene_aux["strand"],
+                                    #                                                str(overlap),
+                                    #                                                str(gene_1_overlap),
+                                    #                                                str(gene_2_overlap)
+                                    #                                                )
 
 
         except FileNotFoundError:
