@@ -57,7 +57,7 @@ def replaceKeyGTF(gtf,mapObj):
                     fout.write(line)
                 else:
                     info_head = line.strip().replace("\n","").split("\t")[0:8]
-                    print(info_head)
+                    # print(info_head)
                     info_row = line.strip().replace("\n","").split("\t")[8]
                     info_arr = info_row.replace("\"","").split(";")
                     info_tail = []
@@ -85,10 +85,14 @@ def extractFPKM_TPM():
 
 def addGeneEntrie(gtf):
 
-    list_trascript_start_stop = []
+    dict_genes = {}
+    list_trascript_start_stop = "list_intervals"
     current_gene_id = ""
     current_strand = ""
     current_chr = ""
+    chr="chr"
+    strand="strand"
+
     try:
         fout=open(gtf + "_withgenes", "w")
         with open(gtf, "r") as f:
@@ -102,39 +106,38 @@ def addGeneEntrie(gtf):
                     if arr[2] != 'transcript':
                         fout.write(line)
                         continue
+
+                    fout.write(line)
                     # check if transcript on same gene and save start stop
                     info_row = arr[8]
                     start = int(arr[3])
                     stop = int(arr[4])
+                    current_strand = arr[6]
+                    current_chr = arr[0]
                     info_arr = info_row.replace("\"","").split(";")
                     for item in info_arr:
                         if len(item.strip())>0:
                             (key,val) = item.strip().split(" ")
                             if key  == "gene_id":
-                                if val == current_gene_id: # means that transcript its on the same gene
-                                    list_trascript_start_stop.append(start)
-                                    list_trascript_start_stop.append(stop)
-                                    current_strand = arr[6]
-                                    current_chr = arr[0]
+                                if val in dict_genes:
+                                    dict_genes[val][list_trascript_start_stop].append(start)
+                                    dict_genes[val][list_trascript_start_stop].append(stop)
                                 else:
-                                    if len(current_gene_id) > 0: # do i have already a gene in memory
-                                        max_stop = max(list_trascript_start_stop)
-                                        min_start = min(list_trascript_start_stop)
+                                    dict_genes[val] = {}
+                                    dict_genes[val][chr]=current_chr
+                                    dict_genes[val][strand]=current_strand
+                                    dict_genes[val][list_trascript_start_stop] = []
+                                    dict_genes[val][list_trascript_start_stop].append(start)
+                                    dict_genes[val][list_trascript_start_stop].append(stop)
 
-                                        fout.write(("{0}\tCufflinks\tgene\t{1}\t{2}\t0\t{3}\t.\tgene_id \"{4}\";\n").format(current_chr,min_start,max_stop,current_strand,current_gene_id))
-
-                                    list_trascript_start_stop = []
-                                    list_trascript_start_stop.append(start)
-                                    list_trascript_start_stop.append(stop)
-                                    current_gene_id = val
-                                    current_strand = arr[6]
-                                    current_chr = arr[0]
                                 break
-                    fout.write(line)
 
-            if len(current_gene_id) > 0:
-                max_stop = max(list_trascript_start_stop)
-                min_start = min(list_trascript_start_stop)
+            for k in dict_genes:
+                current_chr=dict_genes[k][chr]
+                current_strand=dict_genes[k][strand]
+                current_gene_id=k
+                max_stop = max(dict_genes[k][list_trascript_start_stop])
+                min_start = min(dict_genes[k][list_trascript_start_stop])
 
                 fout.write(("{0}\tCufflinks\tgene\t{1}\t{2}\t0\t{3}\t.\tgene_id \"{4}\";\n").format(current_chr,min_start,max_stop,current_strand,current_gene_id))
             fout.close()
@@ -145,12 +148,12 @@ def addGeneEntrie(gtf):
 if __name__ == "__main__":
 
     ################ Assgin unique keys #####################
-    asignUniqueKeys()
+    # asignUniqueKeys()
 
     ################ Add gene entries #####################
-    addGeneEntrie("NONCODEv5_mouse_mm10_lncRNA.gtf")
-    addGeneEntrie("NONCODEv5_human_hg38_lncRNA.gtf")
-    addGeneEntrie("lncrnadb_mm10.gtf")
+    # addGeneEntrie("NONCODEv5_mouse_mm10_lncRNA.gtf")
+    # addGeneEntrie("NONCODEv5_human_hg38_lncRNA.gtf")
+    # addGeneEntrie("lncrnadb_mm10.gtf")
 
 
    ################ Mapping keyes #####################
@@ -164,6 +167,6 @@ if __name__ == "__main__":
     replaceKeyGTF("NONCODEv5_mouse_mm10_lncRNA.gtf_withgenes",dict_mapping)
     replaceKeyGTF("NONCODEv5_human_hg38_lncRNA.gtf_withgenes",dict_mapping)
 
-    replaceKeyGTF("gencode.vM17.long_noncoding_RNAs.gtf",dict_mapping)
-    replaceKeyGTF("gencode.v28.long_noncoding_RNAs.gtf",dict_mapping)
+    # replaceKeyGTF("gencode.vM17.long_noncoding_RNAs.gtf",dict_mapping)
+    # replaceKeyGTF("gencode.v28.long_noncoding_RNAs.gtf",dict_mapping)
 
