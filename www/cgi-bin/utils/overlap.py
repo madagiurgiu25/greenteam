@@ -31,13 +31,15 @@ def findOverlaps(file1, file2=None):
                             if gene["chr"] == gene_aux["chr"]:
                                 overlap = getOverlap([int(gene["start"]),int(gene["stop"])],[int(gene_aux["start"]),int(gene_aux["stop"])])
                                 if overlap > 0:
+                                    gene_1_overlap=round((float)(overlap+1)/(gene["stop"]-gene["start"] +1),4)
+                                    gene_2_overlap=round((float)(overlap+1)/(gene_aux["stop"]-gene_aux["start"] +1),4)
                                     fout.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n").format(gene_1,
                                                                                    gene["strand"],
                                                                                    gene_2,
                                                                                    gene_aux["strand"],
                                                                                    str(overlap+1),
-                                                                                   str((float)(overlap+1)/(gene["stop"]-gene["start"] +1)),
-                                                                                   str((float)(overlap+1)/(gene_aux["stop"]-gene_aux["start"] +1))
+                                                                                   str(gene_1_overlap),
+                                                                                   str(gene_2_overlap)
                                                                                    )
 
 
