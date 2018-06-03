@@ -20,22 +20,24 @@ def findOverlaps(file1, file2=None):
         try:
             with open(file1, 'r') as f:
                 dict_genes = json.load(f)
-                for gene_1 in dict_genes:
+                for gene in dict_genes:
                     print(count)
                     count = count + 1
+                    gene_1=gene["gene_id"]
                     visited.append(gene_1)
-                    for gene_2 in dict_genes:
+                    for gene_aux in dict_genes:
+                        gene_2=gene_aux["gene_id"]
                         if gene_1 != gene_2 and gene_2 not in visited:
-                            if dict_genes[gene_1]["chr"] == dict_genes[gene_2]["chr"]:
-                                overlap = getOverlap([int(dict_genes[gene_1]["start"]),int(dict_genes[gene_1]["stop"])],[int(dict_genes[gene_2]["start"]),int(dict_genes[gene_2]["stop"])]
+                            if gene["chr"] == gene_aux["chr"]:
+                                overlap = getOverlap([int(gene["start"]),int(gene["stop"])],[int(gene_aux["start"]),int(gene_aux["stop"])])
                                 if overlap > 0:
                                     fout.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n").format(gene_1,
-                                                                                   dict_genes[gene_1]["strand"],
+                                                                                   gene["strand"],
                                                                                    gene_2,
-                                                                                   dict_genes[gene_1]["strand"],
+                                                                                   gene_aux["strand"],
                                                                                    str(overlap+1),
-                                                                                   str((float)(overlap+1)/(dict_genes[gene_1]["stop"]-dict_genes[gene_1]["start"] +1)),
-                                                                                   str((float)(overlap+1)/(dict_genes[gene_2]["stop"]-dict_genes[gene_2]["start"] +1))
+                                                                                   str((float)(overlap+1)/(gene["stop"]-gene["start"] +1)),
+                                                                                   str((float)(overlap+1)/(gene_aux["stop"]-gene_aux["start"] +1))
                                                                                    )
 
 
@@ -43,4 +45,4 @@ def findOverlaps(file1, file2=None):
             print("your file does not exist")
 
 if __name__ == "__main__":
-    findOverlaps("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/data/mapping/mm10_primary_assembly_and_lncRNA.json")
+    findOverlaps("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/data/mapping/mm10_primary_assembly_and_lncRNA.json")
