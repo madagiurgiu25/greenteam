@@ -675,6 +675,8 @@ results_transcript <- arrange(adjusted_results, qval)
 
 
 #################################################### GET MANUALLY THE GENE EXPRESSION & TRANSCRIPT EXPRESSION
+library(plyr)
+library(dplyr)
 
 ############## read gene expression from file
 dir=("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/StringTie")
@@ -730,10 +732,31 @@ df_aux<-fpkm_matrix[,2:dim(fpkm_matrix)[2]]
 row.names(df_aux) <- c(as.character(fpkm_matrix$geneID))
 df_filtered = subset(df_aux,filterOne(df_aux) == TRUE)
 colnames(df_filtered) <- as.character(pData(bg)$id)
-adjusted_results < stattest(gowntable = df_filtered, pData=pData(bg), feature='gene', meas='FPKM', mod0=mod0, mod=mod)
+adjusted_results <- stattest(gowntable = df_filtered, pData=pData(bg), feature='gene', meas='FPKM', mod0=mod0, mod=mod)
 results_transcript <- arrange(adjusted_results, qval)
 
+########### GET TPM
+fpkm_matrix <- data.frame(geneID=geneIDs_local)
 
+df_genes<-data.frame(geneID=geneIDs_local)
+
+for (i in 1:length(sample_IDs)){
+    replicate<- subset(df, df$sampleID == sample_IDs[i])
+    colname<-sample_IDs[i]
+    filter_replicate <- data.frame(replicate$TPM,geneID=replicate$geneID)
+    # left join
+    fpkm_matrix<-left_join(x=fpkm_matrix, y=filter_replicate , by="geneID")
+    colnames(fpkm_matrix)[i+1] <- colname
+}
+
+fpkm_matrix<-unique(fpkm_matrix[,1:dim(fpkm_matrix)[2]])
+row.names(fpkm_matrix) <- c(as.character(fpkm_matrix$geneID))
+
+df_aux<-fpkm_matrix[,2:dim(fpkm_matrix)[2]]
+df_filtered = subset(df_aux,filterOne(df_aux) == TRUE)
+colnames(df_filtered) <- as.character(pData(bg)$id)
+adjusted_results <- stattest(gowntable = df_filtered, pData=pData(bg), feature='gene', meas='TPM', mod0=mod0, mod=mod)
+re <- arrange(adjusted_results, qval)
 
 
 
