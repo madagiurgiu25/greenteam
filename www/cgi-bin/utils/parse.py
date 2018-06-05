@@ -15,6 +15,8 @@ path_to_script = os.path.realpath(__file__)
 EXON = 'exon'
 GENE = 'gene'
 TRANSCRIPT = 'transcript'
+UTR='UTR'
+CDS='CDS'
 
 # dictionary constants
 START = 'start'
@@ -33,7 +35,7 @@ TRANSCRIPT_TYPE = 'transcript_type'
 
 # headers in GTF file
 gtfdict = {'gene_id': "", 'transcript_id': "", 'transcript_type': "", 'transcript_name': "", 'gene_name': "",
-           'gene_type': "", 'transcript_type':"", 'tag':"", 'exon_number':"", 'Parent':""}
+           'gene_type': "", 'transcript_type':"", 'tag':"", 'exon_number':"", 'Parent':"", 'level':""}
 
 # headers in GTF file for GENE entry
 gtfdict_gene = {'gene_id': "", 'gene_name': "", 'gene_type': "", 'tag':"",'start':"",'stop':"",'strand':""}
@@ -44,6 +46,11 @@ gtfdict_transcript = {'transcript_id': "", 'transcript_type': "", 'transcript_na
 # headers in GTF file for EXON entry
 gtfdict_exon = {'exon_number': "", 'tag':"",'start':"",'stop':"",'strand':""}
 
+# header in GTF file for UTR entry
+gtfdict_utr = {'level':"",'start':"",'stop':"",'strand':""}
+
+# header in GTF file for CDS entry
+gtfdict_cds= {'start':"",'stop':"",'strand':""}
 
 def infoString2Dict(infoString):
 
@@ -92,6 +99,8 @@ def parseRow2Transcript(arr):
     dict[STOP] = arr[4]
     dict[STRAND] = arr[6]
     dict[EXONS] = []
+    dict[UTR] = []
+    dict[CDS] = {}
 
     # meta info
     info = arr[8].split(";") # Ex: gene_id "ENSG00000243485.5_4"; gene_type "lincRNA"; gene_name "RP11-34P13.3"; level 2; tag "ncRNA_host";
@@ -128,6 +137,50 @@ def parseRow2Gene(arr):
             (key,value) = items
             if key in gtfdict_gene:
                 dict[key] = value.strip().replace("\"","")
+
+    return dict
+
+def parseRow2Utr(arr):
+
+    dict = {}
+    dict[CHR] = arr[0]
+    dict[START] = arr[3]
+    dict[STOP] = arr[4]
+    dict[STRAND] = arr[6]
+
+    # meta info
+    info = arr[8].split(";")  # Ex: gene_id "ENSG00000243485.5_4"; gene_type "lincRNA"; gene_name "RP11-34P13.3"; level 2; tag "ncRNA_host";
+
+    for i in info:
+
+        items = re.split(" |=", i.strip())
+        # only if we have 'key = value' string / overcome empty strings
+        if len(items) == 2:
+            (key, value) = items
+            if key in gtfdict_utr:
+                dict[key] = value.strip().replace("\"", "")
+
+    return dict
+
+def parseRow2CDS(arr):
+
+    dict = {}
+    dict[CHR] = arr[0]
+    dict[START] = arr[3]
+    dict[STOP] = arr[4]
+    dict[STRAND] = arr[6]
+
+    # meta info
+    info = arr[8].split(";")  # Ex: gene_id "ENSG00000243485.5_4"; gene_type "lincRNA"; gene_name "RP11-34P13.3"; level 2; tag "ncRNA_host";
+
+    for i in info:
+
+        items = re.split(" |=", i.strip())
+        # only if we have 'key = value' string / overcome empty strings
+        if len(items) == 2:
+            (key, value) = items
+            if key in gtfdict_cds:
+                dict[key] = value.strip().replace("\"", "")
 
     return dict
 
@@ -246,6 +299,8 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
                             if TRANSCRIPT_NAME is infoDict:
                                 parentTranscript[TRANSCRIPT_NAME] = infoDict[TRANSCRIPT_NAME]
                             parentTranscript[EXONS] = []
+                            parentTranscript[UTR] = []
+                            parentTranscript[CDS] = {}
 
                             transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
 
@@ -266,6 +321,8 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
                             if TRANSCRIPT_NAME is infoDict:
                                 parentTranscript[TRANSCRIPT_NAME] = infoDict[TRANSCRIPT_NAME]
                             parentTranscript[EXONS] = []
+                            parentTranscript[UTR] = []
+                            parentTranscript[CDS] = {}
                             transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
 
                             # add the exon to transcript
@@ -286,6 +343,135 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
                             bigDict.append(parentGene)
                             genesAlreadyParsed[parentGene[GENE_ID]] = ''
                         continue
+
+                    # UTR
+                    if arr[2] == UTR:
+                        newUTR = parseRow2Utr(arr)
+                        if infoDict[GENE_ID] in genesAlreadyParsed and infoDict[TRANSCRIPT_ID] in transcriptsAlreadyParsed:
+                            # Search element
+                            for item in bigDict:
+                                if item[GENE_ID] == infoDict[GENE_ID]:
+                                    for t in item[TRANSCRIPTS]:
+                                        if t[TRANSCRIPT_ID] == infoDict[TRANSCRIPT_ID]:
+                                            t[UTR].append(newUTR)
+                        elif infoDict[GENE_ID] in genesAlreadyParsed and infoDict[TRANSCRIPT_ID] not in transcriptsAlreadyParsed:
+                            # GENE parent exists but not the Transcript
+                            # create and parent transcript
+                            parentTranscript = {}
+                            parentTranscript[TRANSCRIPT_ID] = infoDict[TRANSCRIPT_ID]
+                            if TRANSCRIPT_NAME is infoDict:
+                                parentTranscript[TRANSCRIPT_NAME] = infoDict[TRANSCRIPT_NAME]
+                            parentTranscript[EXONS] = []
+                            parentTranscript[UTR] = []
+                            parentTranscript[CDS] = {}
+
+                            transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
+
+                            # add the exon to transcript
+                            parentTranscript[UTR].append(newUTR)
+
+                            # add the transcript to parent gene
+                            for item in bigDict:
+                                if item[GENE_ID] == infoDict[GENE_ID]:
+                                    item[TRANSCRIPTS].append(parentTranscript)
+
+                        elif infoDict[GENE_ID] not in genesAlreadyParsed:
+                            # nor GENE nor TRANSCRIPT PArents are available
+
+                            # create parent transcript
+                            parentTranscript = {}
+                            parentTranscript[TRANSCRIPT_ID] = infoDict[TRANSCRIPT_ID]
+                            if TRANSCRIPT_NAME is infoDict:
+                                parentTranscript[TRANSCRIPT_NAME] = infoDict[TRANSCRIPT_NAME]
+                            parentTranscript[EXONS] = []
+                            parentTranscript[UTR] = []
+                            parentTranscript[CDS] = {}
+                            transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
+
+                            # add the exon to transcript
+                            parentTranscript[UTR].append(newUTR)
+
+                            # create and parent gene for transcript
+                            parentGene = {}
+                            parentGene[GENE_ID] = infoDict[GENE_ID]
+                            if GENE_TYPE in infoDict:
+                                parentGene[GENE_TYPE] = infoDict[GENE_TYPE]
+                            if GENE_NAME in infoDict:
+                                parentGene[GENE_NAME] = infoDict[GENE_NAME]
+                            parentGene[TRANSCRIPTS] = []
+
+                            # add transcript to parent gene
+                            parentGene[TRANSCRIPTS].append(parentTranscript)
+
+                            bigDict.append(parentGene)
+                            genesAlreadyParsed[parentGene[GENE_ID]] = ''
+                        continue
+
+                        # CDS
+                    if arr[2] == CDS:
+                        newCDS = parseRow2CDS(arr)
+                        if infoDict[GENE_ID] in genesAlreadyParsed and infoDict[
+                            TRANSCRIPT_ID] in transcriptsAlreadyParsed:
+                            # Search element
+                            for item in bigDict:
+                                if item[GENE_ID] == infoDict[GENE_ID]:
+                                    for t in item[TRANSCRIPTS]:
+                                        if t[TRANSCRIPT_ID] == infoDict[TRANSCRIPT_ID]:
+                                            t[CDS] = newCDS
+                        elif infoDict[GENE_ID] in genesAlreadyParsed and infoDict[
+                            TRANSCRIPT_ID] not in transcriptsAlreadyParsed:
+                            # GENE parent exists but not the Transcript
+                            # create and parent transcript
+                            parentTranscript = {}
+                            parentTranscript[TRANSCRIPT_ID] = infoDict[TRANSCRIPT_ID]
+                            if TRANSCRIPT_NAME is infoDict:
+                                parentTranscript[TRANSCRIPT_NAME] = infoDict[TRANSCRIPT_NAME]
+                            parentTranscript[EXONS] = []
+                            parentTranscript[UTR] = []
+                            parentTranscript[CDS] = {}
+
+                            transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
+
+                            # add the exon to transcript
+                            parentTranscript[CDS]=newCDS
+
+                            # add the transcript to parent gene
+                            for item in bigDict:
+                                if item[GENE_ID] == infoDict[GENE_ID]:
+                                    item[TRANSCRIPTS].append(parentTranscript)
+
+                        elif infoDict[GENE_ID] not in genesAlreadyParsed:
+                            # nor GENE nor TRANSCRIPT PArents are available
+
+                            # create parent transcript
+                            parentTranscript = {}
+                            parentTranscript[TRANSCRIPT_ID] = infoDict[TRANSCRIPT_ID]
+                            if TRANSCRIPT_NAME is infoDict:
+                                parentTranscript[TRANSCRIPT_NAME] = infoDict[TRANSCRIPT_NAME]
+                            parentTranscript[EXONS] = []
+                            parentTranscript[UTR] = []
+                            parentTranscript[CDS] = {}
+                            transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
+
+                            # add the exon to transcript
+                            parentTranscript[CDS]= newCDS
+
+                            # create and parent gene for transcript
+                            parentGene = {}
+                            parentGene[GENE_ID] = infoDict[GENE_ID]
+                            if GENE_TYPE in infoDict:
+                                parentGene[GENE_TYPE] = infoDict[GENE_TYPE]
+                            if GENE_NAME in infoDict:
+                                parentGene[GENE_NAME] = infoDict[GENE_NAME]
+                            parentGene[TRANSCRIPTS] = []
+
+                            # add transcript to parent gene
+                            parentGene[TRANSCRIPTS].append(parentTranscript)
+
+                            bigDict.append(parentGene)
+                            genesAlreadyParsed[parentGene[GENE_ID]] = ''
+                        continue
+
         f.close()
 
         ############ Parse and write data to bed
