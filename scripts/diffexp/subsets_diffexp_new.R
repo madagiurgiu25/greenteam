@@ -1,4 +1,4 @@
-setwd("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown/Subsets")
+setwd("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown/Subsets_new")
 library(ballgown)
 library(ggplot2)
 library(gplots)
@@ -36,7 +36,7 @@ filterInfinite <- function(expr_data, na.rm = TRUE){
 }
 
 
-filterHigh <- function(expr_data, na.rm = TRUE){
+filterHigh <- function(expr_data, na.rm = TRUE){s
   size <- dim(expr_data)[2]
   results <- c(rep(TRUE,dim(expr_data)[1]))
   for (i in 1:dim(expr_data)[1]){
@@ -57,6 +57,31 @@ filterZero <- function(expr_data, na.rm = TRUE){
       if(expr_data[i,j] ==0 ){
         results[i] <- FALSE
       }
+  }
+  return(results)
+}
+
+filterZero2 <- function(expr_data, na.rm = TRUE){
+  size <- dim(expr_data)[2]
+  results <- c(rep(TRUE,dim(expr_data)[1]))
+  for (i in 1:dim(expr_data)[1]){
+    count <- 0
+    for(j in 1:(size/2))
+      if(expr_data[i,j] !=0 ){
+        count <- count +1
+      }
+    if (count< (size/2 -1)){
+      results[i] <- FALSE
+    }else{
+      count <- 0
+      for(j in (size/2+1):size)
+        if(expr_data[i,j] !=0 ){
+          count <- count +1
+        }
+        if (count< (size/2 -1)){
+          results[i] <- FALSE
+        }
+    }
   }
   return(results)
 }
@@ -99,7 +124,7 @@ data_directory_bam = ('/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncod
 runBallgownSubsets <- function(sample,size, subset_size, unmatched){
   
   # change workingdir
-  setwd(paste(data_directory,"Subsets",sample,sep="/"))
+  setwd(paste(data_directory,"Subsets_new",sample,sep="/"))
   
   sampleList<-combn(1:size, subset_size, simplify = FALSE)
   
@@ -131,7 +156,7 @@ runBallgownSubsets <- function(sample,size, subset_size, unmatched){
     expression_genes = gexpr(bg)
 
     # all FPKM > 0
-    fone=filterZero(expression_genes)
+    fone=filterZero2(expression_genes)
     df_genes_expression <- data.frame(expression_genes)
     df_genes_expression$filterZero=fone
     dim(df_genes_expression[df_genes_expression$filterZero== TRUE,])
