@@ -122,7 +122,7 @@ def findOverlaps_lnc2gene(file):
 
                 for (rstart,rstop,rdata) in fi:
                     # print(str(rstart) + "\t" + str(rstop) + str(rdata))
-                    if rdata[GENE_ID] != data[GENE_ID] and rdata[GENE_ID][0:3] != "LNC":
+                    if rdata[GENE_ID] != data[GENE_ID] and rdata[GENE_ID][0:3] != "LNC" and rdata['chr'] == data['chr']:
                         s = max(start, rstart)
                         e = min(stop, rstop)
                         if rdata['type'] == EXON:
