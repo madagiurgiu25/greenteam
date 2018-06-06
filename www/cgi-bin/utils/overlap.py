@@ -71,10 +71,18 @@ def findOverlaps(file1, file2=None):
         except FileNotFoundError:
             print("your file does not exist")
 
+def find(start, end, tree):
+    "Returns a list with the overlapping intervals"
+    out = []
+    tree.intersect( start, end, lambda x: out.append(x) )
+    return [ (x.start, x.end) for x in out ]
+
+
 def findOverlaps_lnc2gene(file):
 
     # construct interval tree
     it_regions  = intervaltree.IntervalTree()
+    list_cds = {}
     try:
         with open(file, "r") as f:
             for line in f:
@@ -100,31 +108,44 @@ def findOverlaps_lnc2gene(file):
                         dict['transcriptID'] = transcriptID.group(1)
                     if exonnumber is not None:
                         dict['exonnumber'] = exonnumber.group(1)
-
-                    it_regions[start:stop] = dict
+                    it_regions.append(intervaltree.Interval(start, stop , dict))
                     # print(it_regions[start:stop])
                    # print(it_regions[start:stop])
 
         dict={}
         ##### find overlaps
         for (start,stop,data) in it_regions:
-            if data['type'] == 'gene' and GENE_ID in dict_words and len(data[GENE_ID]) > 3 and data[GENE_ID][0:3] == "LNC":
-                fi = it_regions.search(start,stop,{'chr':data['chr']})
-                arr = {'exon':0,'CDS':0,'UTR':0}
+            if data['type'] == 'exon' and GENE_ID in dict_words and len(data[GENE_ID]) > 3 and data[GENE_ID][0:3] == "LNC":
+                fi=it_regions.search(start,stop, {'chr':data['chr']})
+                arr = {'exon':0,'UTR':0,'CDS':0,'gene':0}
+                print("To search  " + data['chr'] + "\t" + data[GENE_ID] + "\t" + str(start) + "\t" + str(stop))
+
                 for (rstart,rstop,rdata) in fi:
-                    if rdata[GENE_ID] != data[GENE_ID] and rdata[GENE_ID][0:3] == "LNC":
+                    # print(str(rstart) + "\t" + str(rstop) + str(rdata))
+                    if rdata[GENE_ID] != data[GENE_ID] and rdata[GENE_ID][0:3] != "LNC":
+                        s = max(start, rstart)
+                        e = min(stop, rstop)
                         if rdata['type'] == EXON:
-                            arr[EXON] += (rstop-rstart)/(stop-start)
+                            arr[EXON] += (e-s)/(stop-start)
                         elif rdata['type'] == UTR:
-                            arr[UTR] += (rstop - rstart) / (stop - start)
+                            arr[UTR] += (e-s) / (stop - start)
                         elif rdata['type'] == CDS:
-                            arr[CDS] += (rstop - rstart) / (stop - start)
+                            arr[CDS] += (e-s) / (stop - start)
+                        elif  rdata['type'] == GENE:
+                            arr[GENE] += (e-s) / (stop - start)
+                        print(arr)
                 dict[data[GENE_ID]] = {}
                 dict[data[GENE_ID]]['arr'] = arr
+                print(arr)
+
+
 
         fout = open("test_chr18.txt", 'w')
-        # find max
+        # find maxxon
         for item in dict:
+            # check for noncoding exons
+            dict[item]['arr']['exon'] =  dict[item]['arr']['exon'] - dict[item]['arr']['UTR'] - dict[item]['arr']['CDS']
+            dict[item]['arr']['gene'] = dict[item]['arr']['gene'] - dict[item]['arr']['exon'] - dict[item]['arr']['UTR'] - dict[item]['arr']['CDS']
             dict[item]['HIT'] = max(dict[item]['arr'].items(), key=operator.itemgetter(1))[0]
             dict[item]['SCORE'] = dict[item]['arr'][dict[item]['HIT']]
             if dict[item]['SCORE'] == 0:
@@ -140,6 +161,6 @@ def findOverlaps_lnc2gene(file):
         print("your file does not exist")
 
 if __name__ == "__main__":
-    findOverlaps("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/data/mapping/mm10_primary_assembly_and_lncRNA.gtf")
+    # findOverlaps("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/data/mapping/mm10_primary_assembly_and_lncRNA.gtf")
     # findOverlaps("mm10_primary_assembly_and_lncRNA.json")
-    # findOverlaps_lnc2gene("chr18.gtf")
+    findOverlaps_lnc2gene("test.gtf")
