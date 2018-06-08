@@ -474,6 +474,14 @@ ggplot(merge2, aes(x=fc_lnc,y=fc_gene, shape=as.factor(found), color=as.numeric(
   theme(axis.text=element_text(size=12),
         axis.title=element_text(size=14,face="bold")) + ggtitle("logFC correlation between lncRNA and its overlapping gene \n (lnc = consistent diff exp over at least 4 replicates and enriched in After IP)")
 
+g<- ggplot(merge2, aes(x=fc_lnc,y=fc_gene, color=as.numeric(as.character(lnc_fraction)))) + geom_point(subset = .()) + 
+  xlab("lnc log2FC") + ylab("gene log2FC") +
+  scale_colour_gradient(name="lnc overlapping fraction",low = "gray", high = "blue") +
+  scale_shape_discrete(labels=c("low-expressed","diff-exp"),name="gene types") + 
+  theme(axis.text=element_text(size=12),
+        axis.title=element_text(size=14,face="bold")) + ggtitle("logFC correlation between lncRNA and its overlapping gene \n (lnc = consistent diff exp over at least 4 replicates and enriched in After IP)") +
+  theme(panel.background = element_blank())
+
 
 df_subset<-subset(merge2,merge2$found == 1 & merge2$fc_lnc >= 2 & abs(merge2$fc_gene)<1)
 write.table(df_subset,file="subset_lnc_gene_overlap_fclnc>2_fcgene<1_both_expressed.txt",sep="\t",col.names = T,quote=F,row.names = F)
