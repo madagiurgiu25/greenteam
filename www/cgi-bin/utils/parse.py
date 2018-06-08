@@ -100,7 +100,7 @@ def parseRow2Transcript(arr):
     dict[STRAND] = arr[6]
     dict[EXONS] = []
     dict[UTR] = []
-    dict[CDS] = {}
+    dict[CDS] = []
 
     # meta info
     info = arr[8].split(";") # Ex: gene_id "ENSG00000243485.5_4"; gene_type "lincRNA"; gene_name "RP11-34P13.3"; level 2; tag "ncRNA_host";
@@ -300,7 +300,7 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
                                 parentTranscript[TRANSCRIPT_NAME] = infoDict[TRANSCRIPT_NAME]
                             parentTranscript[EXONS] = []
                             parentTranscript[UTR] = []
-                            parentTranscript[CDS] = {}
+                            parentTranscript[CDS] = []
 
                             transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
 
@@ -322,7 +322,7 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
                                 parentTranscript[TRANSCRIPT_NAME] = infoDict[TRANSCRIPT_NAME]
                             parentTranscript[EXONS] = []
                             parentTranscript[UTR] = []
-                            parentTranscript[CDS] = {}
+                            parentTranscript[CDS] = []
                             transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
 
                             # add the exon to transcript
@@ -363,7 +363,7 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
                                 parentTranscript[TRANSCRIPT_NAME] = infoDict[TRANSCRIPT_NAME]
                             parentTranscript[EXONS] = []
                             parentTranscript[UTR] = []
-                            parentTranscript[CDS] = {}
+                            parentTranscript[CDS] = []
 
                             transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
 
@@ -385,7 +385,7 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
                                 parentTranscript[TRANSCRIPT_NAME] = infoDict[TRANSCRIPT_NAME]
                             parentTranscript[EXONS] = []
                             parentTranscript[UTR] = []
-                            parentTranscript[CDS] = {}
+                            parentTranscript[CDS] = []
                             transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
 
                             # add the exon to transcript
@@ -417,7 +417,7 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
                                 if item[GENE_ID] == infoDict[GENE_ID]:
                                     for t in item[TRANSCRIPTS]:
                                         if t[TRANSCRIPT_ID] == infoDict[TRANSCRIPT_ID]:
-                                            t[CDS] = newCDS
+                                            t[CDS].append(newCDS)
                         elif infoDict[GENE_ID] in genesAlreadyParsed and infoDict[
                             TRANSCRIPT_ID] not in transcriptsAlreadyParsed:
                             # GENE parent exists but not the Transcript
@@ -428,12 +428,12 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
                                 parentTranscript[TRANSCRIPT_NAME] = infoDict[TRANSCRIPT_NAME]
                             parentTranscript[EXONS] = []
                             parentTranscript[UTR] = []
-                            parentTranscript[CDS] = {}
+                            parentTranscript[CDS] = []
 
                             transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
 
                             # add the exon to transcript
-                            parentTranscript[CDS]=newCDS
+                            parentTranscript[CDS].append(newCDS)
 
                             # add the transcript to parent gene
                             for item in bigDict:
@@ -450,11 +450,11 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
                                 parentTranscript[TRANSCRIPT_NAME] = infoDict[TRANSCRIPT_NAME]
                             parentTranscript[EXONS] = []
                             parentTranscript[UTR] = []
-                            parentTranscript[CDS] = {}
+                            parentTranscript[CDS] = []
                             transcriptsAlreadyParsed[parentTranscript[TRANSCRIPT_ID]] = ''
 
                             # add the exon to transcript
-                            parentTranscript[CDS]= newCDS
+                            parentTranscript[CDS].append(newCDS)
 
                             # create and parent gene for transcript
                             parentGene = {}
