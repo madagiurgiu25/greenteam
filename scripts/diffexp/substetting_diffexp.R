@@ -478,4 +478,45 @@ ggplot(merge2, aes(x=fc_lnc,y=fc_gene, shape=as.factor(found), color=as.numeric(
 df_subset<-subset(merge2,merge2$found == 1 & merge2$fc_lnc >= 2 & abs(merge2$fc_gene)<1)
 write.table(df_subset,file="subset_lnc_gene_overlap_fclnc>2_fcgene<1_both_expressed.txt",sep="\t",col.names = T,quote=F,row.names = F)
 
+###################################################################33
+####################################################################
+library(reshape)
+library(ggplot2)
+library(ggplot2)
+library(gridExtra)
+library(reshape2)
+library(plyr)
+setwd("E:\\masterpraktikum\\mouse\\")
+data<-read.csv2(file="logFC_FPKM_qval_M103_class45.txt",sep="\t", header = T, row.names = 1)
+
+data_lnc<-subset(data, substring(row.names(data),1,3) == "LNC")
+df_plot <- rbind(data.frame(FPKM = data_lnc$FPKM.M103A1, Sample = "M103A1", Condition="After",fc=data_lnc$FPKM.M103A1_FPKM.M103B1_log2FC, genes=row.names(data_lnc)),
+                 data.frame(FPKM = data_lnc$FPKM.M103A2, Sample = "M103A2", Condition="After",fc=data_lnc$FPKM.M103A2_FPKM.M103B2_log2FC,genes=row.names(data_lnc)),
+                 data.frame(FPKM = data_lnc$FPKM.M103A3, Sample = "M103A3", Condition="After",fc=data_lnc$FPKM.M103A3_FPKM.M103B3_log2FC,genes=row.names(data_lnc)),
+                 data.frame(FPKM = data_lnc$FPKM.M103A4, Sample = "M103A4", Condition="After",fc=data_lnc$FPKM.M103A4_FPKM.M103B4_log2FC,genes=row.names(data_lnc)),
+                 data.frame(FPKM = data_lnc$FPKM.M103A5, Sample = "M103A5", Condition="After",fc=data_lnc$FPKM.M103A5_FPKM.M103B5_log2FC,genes=row.names(data_lnc)),
+                 data.frame(FPKM = data_lnc$FPKM.M103B1, Sample = "M103B1", Condition="Before",fc=data_lnc$FPKM.M103A1_FPKM.M103B1_log2FC,genes=row.names(data_lnc)),
+                 data.frame(FPKM = data_lnc$FPKM.M103B2, Sample = "M103B2", Condition="Before",fc=data_lnc$FPKM.M103A2_FPKM.M103B2_log2FC,genes=row.names(data_lnc)),
+                 data.frame(FPKM = data_lnc$FPKM.M103B3, Sample = "M103B3", Condition="Before",fc=data_lnc$FPKM.M103A3_FPKM.M103B3_log2FC,genes=row.names(data_lnc)),
+                 data.frame(FPKM = data_lnc$FPKM.M103B4, Sample = "M103B4", Condition="Before",fc=data_lnc$FPKM.M103A4_FPKM.M103B4_log2FC,genes=row.names(data_lnc)),
+                 data.frame(FPKM = data_lnc$FPKM.M103B5, Sample = "M103B5", Condition="Before",fc=data_lnc$FPKM.M103A5_FPKM.M103B5_log2FC,genes=row.names(data_lnc))  )
+
+ggplot(df_plot,aes(x=as.numeric(as.character(fc)),y=as.numeric(as.character(FPKM)),color=Sample)) + 
+    geom_point() +  
+    theme(legend.position="left") + 
+    facet_wrap(~factor(Condition)) + 
+    scale_y_log10() + 
+    ggtitle("FPKM and log2FC ") + 
+    xlab("log2FC between matched pairs") + ylab("log(FPKM)")
+
+
+ggplot(df_plot,aes(x=Sample,y=as.numeric(as.character(FPKM)),group=genes,color=genes)) + 
+    geom_line() +  
+    theme(legend.position="left") + 
+    # facet_wrap(~factor(Condition)) + 
+    scale_y_log10() + 
+    xlab("Samples") + ylab("log(FPKM)") +
+theme(legend.position="none")
+
+
 
