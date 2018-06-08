@@ -250,3 +250,24 @@ colnames(data)<-c("M103A1","M103A2","M103A3","M103A4","M103B1","M103B2","M103B3"
 
 heatmap_top100<- d3heatmap(data, scale = "column", colors="YlOrRd", dendrogram="none", Rowv=F)
 saveWidget(heatmap_top100, "M103_top100.html")
+
+
+##################################################################
+library(dplyr)
+# heatmap
+library(d3heatmap)
+library(htmlwidgets)
+
+
+setwd("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown/Subsets/M103/consistent_lncRNA_class45")
+data <- read.csv2(file="logFC_FPKM_qval_M103_onlyLNC_class45_lnc_gene_both_expressed.txt",sep="\t",header=F,)
+
+df <- data.frame(data[,13:17])
+matrix <- as.matrix(cbind(as.numeric(as.character(df$V13)),
+                          as.numeric(as.character(df$V14)),
+                          as.numeric(as.character(df$V15)),
+                          as.numeric(as.character(df$V16)),as.numeric(as.character(df$V17))))
+rownames(matrix) <- data$V1
+colnames(data)<-c("log2FC(A1-B1)","log2FC(A2-B2)","log2FC(A3-B3)","log2FC(A4-B4)","log2FC(A5-B5)")
+heatmap_top100<- d3heatmap(matrix, scale = "column", colors="YlOrRd", dendrogram="none", Rowv=F)
+saveWidget(heatmap_top100, "M103_top112_LOG2FC_2.html")
