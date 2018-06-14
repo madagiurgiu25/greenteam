@@ -240,7 +240,7 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
                                         break
                         continue
 
-                    ############## Add element (Gene/Transcript/Exon
+                    ############## Add element (Gene/Transcript/Exon)
                     # GENE
                     if arr[2] == GENE: # gene can contain multiple transcripts
                         newGene = parseRow2Gene(arr)

@@ -24,6 +24,100 @@ TRANSCRIPT = 'transcript'
 UTR = 'UTR'
 CDS = 'CDS'
 
+# create super genes
+def mergeGenes(gtfFile, overlapsFile,mappingFile, out):
+
+    mapping = {}
+
+    try:
+        with open(mappingFile, 'r') as f:
+            mapping = json.load(f)
+    except FileNotFoundError:
+            print("your file does not exist")
+
+
+    subGenesDict = {}
+    superGeneDict = {}
+    # create a dictionary using the overlaps. Each LNC has a parent which can be either
+    # same lnc or a different on. Of course there is 1 Parent per LNC
+    try:
+        # create genes dict
+        with open(overlapsFile, 'r') as f:
+            for l in f:
+                if l.startswith("#"): # ignore header
+                    continue
+
+                row = l.replace("\n","").split("\t")
+
+                if row[7] != 'LNC-LNC': # ignore other types of overlap (ENS-ENS, LNC-ENS)
+                    continue
+
+                if (float(row[6]) == 1 or float(row[5]) == 1) and row[1] == row[3]:
+
+                    if float(row[6]) > float(row[5]): # compare matched fraction + strandness
+                        supergene = row[0]
+                        subgene = row[2]
+
+                    elif float(row[6]) <= float(row[5]):
+                        supergene = row[2]
+                        subgene = row[0]
+
+                    if subgene not in subGenesDict: # gene does not have already a supergene
+                        subGenesDict[subgene] = supergene # {subgene:supergene}
+
+                        if supergene not in superGeneDict: #{supergene:[subgene1, subgene2,....]}
+                            superGeneDict[supergene] = []
+                        superGeneDict[supergene].append(subgene)
+
+        ## create new GTF
+        newgtf = open(out,'w')
+        # create genes dict
+        with open(gtfFile, 'r') as f:
+            for l in f:
+                if l.startswith("#"):
+                    newgtf.write(l)
+                    continue
+
+                row = l.replace("\n","").split("\t")
+                geneid = re.search("gene_id \"(.*?)\";", row[8], flags=0)
+
+                if geneid is not None:
+                    geneid = geneid.group(1)
+
+                    # write everything that is not noncoding
+                    if geneid.startswith("LNC") == False:
+                        newgtf.write(l)
+                        continue
+
+                    # write everything no change if the gene is a superGene
+                    if geneid in superGeneDict:
+                        newgtf.write(l)
+                        continue
+
+                    # write LNC which do not overlap with anything
+                    if geneid not in superGeneDict and geneid not in subGenesDict:
+                        newgtf.write(l)
+                        continue
+
+                    # change for each entry which is a subgene the parent gene (superGene)
+                    if geneid in subGenesDict:
+                        # print(l)
+                        # print(geneid)
+                        # print(subGenesDict[geneid])
+                        new_l = l.replace(geneid,subGenesDict[geneid])
+                        new_l = new_l.replace(mapping[geneid]['alias'],mapping[subGenesDict[geneid]]['alias'])
+                        new_l = new_l.replace("\n","; gene_id_subgene \"" + geneid + "\"; gene_id_subgene_alias \"" + mapping[geneid]['alias'] + "\"\n")
+                        newgtf.write(new_l)
+                        # print("subgene")
+                        # print(new_l)
+                        continue
+                print("outsider")
+                print(l)
+        newgtf.close()
+    except FileNotFoundError:
+            print("your file does not exist")
+
+
 def getOverlap(a, b):
     return max(0, min(a[1], b[1]) - max(a[0], b[0]))
 
@@ -40,7 +134,7 @@ def findOverlaps(file1, file2=None):
         try:
             with open(file1, 'r') as f:
                 dict_genes = json.load(f)
-                print("Total number of genes: " +  str(len(dict_genes)))
+                # print("Total number of genes: " +  str(len(dict_genes)))
                 for index, gene in enumerate(dict_genes):
                     print(count)
                     count = count + 1
@@ -57,15 +151,6 @@ def findOverlaps(file1, file2=None):
                                 overlap_len = overlap +1
                                 fout.write(gene_1 + "\t" + gene['strand'] + "\t" + gene_2 + "\t" + gene_aux["strand"] + "\t" + str(overlap_len) + "\t" + str(gene_1_overlap) + "\t" + str(gene_2_overlap) + "\n")
                                 count_overlaps += 1
-                                # fout.write("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n").format(gene_1,
-                                #                                                gene["strand"],
-                                #                                                gene_2,
-                                #                                                gene_aux["strand"],
-                                #                                                str(overlap),
-                                #                                                str(gene_1_overlap),
-                                #                                                str(gene_2_overlap)
-                                #                                                )
-
                 print("Total number of genes: " +  str(len(dict_genes)))
                 print("Number of overlaps: " + str(count_overlaps))
         except FileNotFoundError:
@@ -163,4 +248,5 @@ def findOverlaps_lnc2gene(file):
 if __name__ == "__main__":
     # findOverlaps("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/data/mapping/mm10_primary_assembly_and_lncRNA.gtf")
     # findOverlaps("mm10_primary_assembly_and_lncRNA.json")
-    findOverlaps_lnc2gene("mm10_primary_assembly_and_lncRNA.gtf")
+    # findOverlaps_lnc2gene("mm10_primary_assembly_and_lncRNA.gtf")
+    mergeGenes("mm10_primary_assembly_and_lncRNA.gtf","overlaps_formatted.txt","mapping_keys.json","mm10_primary_assembly_and_lncRNA_supergenes.gtf")

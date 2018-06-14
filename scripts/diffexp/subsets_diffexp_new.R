@@ -1,4 +1,4 @@
-setwd("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown/Subsets_new")
+setwd("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown/Subsets")
 library(ballgown)
 library(ggplot2)
 library(gplots)
@@ -36,7 +36,7 @@ filterInfinite <- function(expr_data, na.rm = TRUE){
 }
 
 
-filterHigh <- function(expr_data, na.rm = TRUE){s
+filterHigh <- function(expr_data, na.rm = TRUE){
   size <- dim(expr_data)[2]
   results <- c(rep(TRUE,dim(expr_data)[1]))
   for (i in 1:dim(expr_data)[1]){
@@ -114,6 +114,37 @@ filterFPKM_mean <- function(expr_data, na.rm = TRUE){
   return(results)
 }
 
+# input example (df, c(M103A1, M103A2), c(M103B1,M103B2), 2, A12, B12)
+plotFPKMs <- function(df,after,before,subset_size,name_after,name_before){
+    
+    require(cowplot)
+    theme_set(theme_cowplot(font_size=12)) # reduce default font size
+    
+    df_2 <- gather(df[,1:(2*size)],"Sample","FPKM",1:(2*size))
+    df_2$Type <- substring(df_2$Sample,1,10)
+    df_2$Replicate <- substring(df_2$Sample,11,12)
+    
+    df3_quantile <- df_2[as.numeric(as.character(df_2$FPKM)) < quantile(as.numeric(as.character(df_2$FPKM)), 0.95), ]
+    
+    p1<- ggplot(df3_quantile,aes(as.numeric(as.character(FPKM)),fill=Type)) + 
+        geom_density(alpha = 0.4) + 
+         xlab("FPKM") + ggtitle(paste("FPKM distribution ",sample,sep=""))
+    
+    p2<-ggplot(df3_quantile,aes(x=Type, y=as.numeric(as.character(FPKM)),fill=Replicate)) + 
+        geom_boxplot(alpha = 0.4) + scale_y_log10() + ylab("log10(FPKM)") + xlab("Condition") + 
+        ggtitle(paste("FPKM distribution ",sample,sep=""))
+    
+    p3<-ggplot(df3_quantile, aes(x=as.numeric(as.character(FPKM)), fill=Replicate)) +
+            geom_density(alpha=0.4) +
+        facet_grid(~Type) + xlab("FPKM") +  ylab("density") + 
+        ggtitle(paste("FPKM density ",sample,sep=""))
+    
+    png(file=paste("FPKM",name_after,paste(name_before,".png",sep=""),sep="_"),height=1200,width=800)
+    grid.arrange(p1,p2,p3,ncol = 1)
+    dev.off()
+    
+}
+
 
 ################################################### run subsets ###########################################################
 ############################# unmatched/matched ###########################################################################
@@ -124,7 +155,7 @@ data_directory_bam = ('/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncod
 runBallgownSubsets <- function(sample,size, subset_size, unmatched){
   
   # change workingdir
-  setwd(paste(data_directory,"Subsets_new",sample,sep="/"))
+  setwd(paste(data_directory,"Subsets",sample,sep="/"))
   
   sampleList<-combn(1:size, subset_size, simplify = FALSE)
   
@@ -156,10 +187,14 @@ runBallgownSubsets <- function(sample,size, subset_size, unmatched){
     expression_genes = gexpr(bg)
 
     # all FPKM > 0
-    fone=filterZero2(expression_genes)
+    fone=filterZero(expression_genes)
     df_genes_expression <- data.frame(expression_genes)
     df_genes_expression$filterZero=fone
     dim(df_genes_expression[df_genes_expression$filterZero== TRUE,])
+    
+    # plots
+    plotFPKMs(subset(df_genes_expression[df_genes_expression$filterZero== TRUE,]), after, before, subset_size,after_samples,before_samples)
+    
     fi=row.names(subset(df_genes_expression, df_genes_expression$filterZero == TRUE))
     bg_filtered = subset(bg,"ballgown::geneIDs(bg) %in% fi",genomesubset=TRUE)
     
@@ -234,5 +269,28 @@ runBallgownSubsets("Mlet7",7,5,TRUE)
 runBallgownSubsets("Mlet7",7,5,FALSE)
 
 
+################################### Plot FPKMs
+library(tidyr)
+setwd("E:\\masterpraktikum\\mouse")
+
+# df <- subset(df_genes_expression[df_genes_expression$filterZero== TRUE,])
+df<-read.csv2(file="test.txt",sep = "\t",row.names=1,header=T)
+size=4
+df_2 <- gather(df[,1:8],"Sample","FPKM",1:(2*size))
+df_2$Type <- substring(df_2$Sample,1,10)
+df_2$Replicate <- substring(df_2$Sample,11,12)
+
+ggplot(df_2,aes(as.numeric(as.character(FPKM)),fill=Type)) + 
+    geom_density(alpha = 0.4) + scale_x_continuous( trans='log2') + 
+    xlim(0,50) + scale_fill_manual(values=c("After","Before")) +
+    xlab("FPKM") + ggtitle(paste("FPKM distribution ",sample,sep=""))
+
+ggplot(df_2,aes(x=Type, y=as.numeric(as.character(FPKM)),fill=Replicate)) + 
+    geom_boxplot(alpha = 0.4) + scale_y_log10() + ylab("log10(FPKM)") + xlab("Condition") + 
+     ggtitle(paste("FPKM distribution ",sample,sep=""))
+
+df<-read.csv2(file="overlaps_lnc.txt",sep="\t",header=F)
+ggplot(df, aes(x=as.numeric(as.character(V1)))) + geom_step(aes(y=..y..),stat="ecdf",size=1) +
+    xlab("Overlaps") + ylab("cummulative frequency of overlaps") + ggtitle("Cummulative plot LNC - overlaps") + scale_x_log10()
 
 
