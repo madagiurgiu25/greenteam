@@ -1,4 +1,4 @@
-setwd("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown/Subsets")
+setwd("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown_Supergenes/Subsets")
 library(ballgown)
 library(ggplot2)
 library(gplots)
@@ -9,6 +9,7 @@ library(ggfortify)
 library(ggplot2)
 library(grid)
 library(gridExtra)
+library(tidyr)
 set.seed(1234)
 
 filterOne <- function(expr_data, na.rm = TRUE){
@@ -117,10 +118,10 @@ filterFPKM_mean <- function(expr_data, na.rm = TRUE){
 # input example (df, c(M103A1, M103A2), c(M103B1,M103B2), 2, A12, B12)
 plotFPKMs <- function(df,after,before,subset_size,name_after,name_before){
     
-    require(cowplot)
-    theme_set(theme_cowplot(font_size=12)) # reduce default font size
+    # require(cowplot)
+    # theme_set(theme_cowplot(font_size=12)) # reduce default font size
     
-    df_2 <- gather(df[,1:(2*size)],"Sample","FPKM",1:(2*size))
+    df_2 <- gather(df[,1:(2*subset_size)],"Sample","FPKM",1:(2*subset_size))
     df_2$Type <- substring(df_2$Sample,1,10)
     df_2$Replicate <- substring(df_2$Sample,11,12)
     
@@ -149,10 +150,18 @@ plotFPKMs <- function(df,after,before,subset_size,name_after,name_before){
 ################################################### run subsets ###########################################################
 ############################# unmatched/matched ###########################################################################
 
-data_directory = ('/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown')
+data_directory = ('/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown_Supergenes')
 data_directory_bam = ('/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/STAR')
 
 runBallgownSubsets <- function(sample,size, subset_size, unmatched){
+  
+  size=as.numeric(as.character(size))
+  print(size)
+  subset_size=as.numeric(as.character(subset_size))
+  print(subset_size)
+  
+  unmatched=as.logical(as.character(unmatched))
+  print(unmatched)
   
   # change workingdir
   setwd(paste(data_directory,"Subsets",sample,sep="/"))
@@ -178,11 +187,15 @@ runBallgownSubsets <- function(sample,size, subset_size, unmatched){
     bam_paths = paste(data_directory_bam, sample_IDs, "star_sorted.bam", sep="/")
     print(bam_paths)
     bg = ballgown(samples=sample_paths, bamfiles=bam_paths, meas='all')
+    print(head(ballgown::geneIDs(bg)))
     
+    print("make design matrix")
     # matrix design
     pData(bg) = data.frame(id=sampleNames(bg), group=factor(rep(2:1, c(subset_size,subset_size))))
     print(pData(bg)) 
     
+    
+    print("compute gene expression")
     # gene expression
     expression_genes = gexpr(bg)
 
@@ -190,14 +203,17 @@ runBallgownSubsets <- function(sample,size, subset_size, unmatched){
     fone=filterZero(expression_genes)
     df_genes_expression <- data.frame(expression_genes)
     df_genes_expression$filterZero=fone
+    fmean=filterFPKM_mean(expression_genes)
+    df_genes_expression$filterFPKM_mean=fmean
     dim(df_genes_expression[df_genes_expression$filterZero== TRUE,])
-    
+
     # plots
-    plotFPKMs(subset(df_genes_expression[df_genes_expression$filterZero== TRUE,]), after, before, subset_size,after_samples,before_samples)
-    
+    # plotFPKMs(subset(df_genes_expression[df_genes_expression$filterZero== TRUE,]), after, before, subset_size,after_samples,before_samples)
+
     fi=row.names(subset(df_genes_expression, df_genes_expression$filterZero == TRUE))
+    print(head(fi))
     bg_filtered = subset(bg,"ballgown::geneIDs(bg) %in% fi",genomesubset=TRUE)
-    
+
     if (unmatched == TRUE){
       adjusted_results = stattest(bg_filtered, pData=pData(bg_filtered), feature='gene', meas='FPKM', covariate="group", getFC=TRUE)
     }else{
@@ -205,19 +221,19 @@ runBallgownSubsets <- function(sample,size, subset_size, unmatched){
       matched_pair
       mod = model.matrix(~matched_pair + pData(bg_filtered)$group)
       mod0 = model.matrix(~ pData(bg_filtered)$group)
-      
+
       adjusted_results = stattest(bg_filtered, pData=pData(bg_filtered), feature='gene', meas='FPKM', mod0=mod0, mod=mod)
     }
-    
+
     results_genes <- arrange(adjusted_results, qval)
-    
+    print(head(results_genes))
     if (unmatched == TRUE){
       #filter only lnc significant
       re_lnc <- subset(results_genes, results_genes$qval < 0.05 & substring(results_genes$id,1,3) == 'LNC')
       expression_lnc <- subset(df_genes_expression, row.names(df_genes_expression) %in% re_lnc$id)
       write.table(expression_lnc,file=paste(sample,after_samples,before_samples,"expressed_genes_fpkm.txt",sep="_"),sep="\t",col.names=T,quote=F,row.names = T)
       write.table(re_lnc,file=paste(sample,after_samples,before_samples,"expressed_genes_logFC.txt",sep="_"),sep="\t",col.names=T,quote=F,row.names = F)
-      
+
       #filter enriched in After IP
       expression_lnc <- subset(df_genes_expression, df_genes_expression$filterFPKM_mean == TRUE & row.names(df_genes_expression) %in% re_lnc$id)
       re_lnc <- subset(re_lnc,re_lnc$id %in% row.names(expression_lnc))
@@ -229,14 +245,80 @@ runBallgownSubsets <- function(sample,size, subset_size, unmatched){
       expression_lnc <- subset(df_genes_expression, row.names(df_genes_expression) %in% re_lnc$id)
       write.table(expression_lnc,file=paste(sample,after_samples,before_samples,"expressed_genes_fpkm_matched.txt",sep="_"),sep="\t",col.names=T,quote=F,row.names = T)
       write.table(re_lnc,file=paste(sample,after_samples,before_samples,"expressed_genes_logFC_matched.txt",sep="_"),sep="\t",col.names=T,quote=F,row.names = F)
-      
+
       #filter enriched in After IP
       expression_lnc <- subset(df_genes_expression, df_genes_expression$filterFPKM_mean == TRUE & row.names(df_genes_expression) %in% re_lnc$id)
       re_lnc <- subset(re_lnc,re_lnc$id %in% row.names(expression_lnc))
       write.table(expression_lnc,file=paste(sample,after_samples,before_samples,"expressed_genes_fpkm_enrichedAfterIP_matched.txt",sep="_"),sep="\t",col.names=T,quote=F,row.names = T)
       write.table(re_lnc,file=paste(sample,after_samples,before_samples,"expressed_genes_logFC_enrichedAfterIP_matched.txt",sep="_"),sep="\t",col.names=T,quote=F,row.names = F)
-      
     }
+
+    ##################### isoform diff exp
+    
+    bg_filtered2 = subset(bg_filtered,"rowVars(texpr(bg_filtered)) >1",genomesubset=TRUE)
+    
+    # gene expression
+    expression_genes = texpr(bg_filtered2)
+    
+    # all FPKM > 0
+    fone=filterZero(expression_genes)
+    df_genes_expression <- data.frame(expression_genes)
+    df_genes_expression$filterZero=fone
+    fmean=filterFPKM_mean(expression_genes)
+    df_genes_expression$filterFPKM_mean=fmean
+    df_filtered<-subset(df_genes_expression[df_genes_expression$filterZero== TRUE,])
+    
+    expression_transcript <- texpr(bg_filtered2,'all')
+    fi=subset(expression_transcript, expression_transcript$t_id %in% row.names(df_filtered))
+    bg_filtered3 = subset(bg_filtered2,"ballgown::transcriptNames(bg_filtered2) %in% fi$t_name",genomesubset=TRUE)
+    
+    
+    
+    if (unmatched == TRUE){
+      adjusted_results = stattest(bg_filtered3, pData=pData(bg_filtered3), feature='transcript', meas='FPKM', covariate="group", getFC=TRUE)
+    }else{
+      matched_pair= factor(rep(1:subset_size,2))
+      matched_pair
+      mod = model.matrix(~matched_pair + pData(bg_filtered3)$group)
+      mod0 = model.matrix(~ pData(bg_filtered3)$group)
+      
+      adjusted_results = stattest(bg_filtered3, pData=pData(bg_filtered3), feature='transcript', meas='FPKM', mod0=mod0, mod=mod)
+    }
+    
+    results_genes <- arrange(adjusted_results, qval)
+    results_transcripts = data.frame(geneNames=ballgown::geneNames(bg_filtered3),
+                                     geneIDs=ballgown::geneIDs(bg_filtered3),
+                                     transcriptID=ballgown::transcriptNames(bg_filtered3),
+                                     results_genes)
+    
+    
+    if (unmatched == TRUE){
+      #filter only lnc significant
+      re_lnc <- subset(results_transcripts, results_transcripts$qval < 0.05 & substring(results_transcripts$transcriptID,1,3) == 'LNC')
+      expression_lnc <- subset(df_genes_expression, row.names(df_genes_expression) %in% re_lnc$id)
+      write.table(expression_lnc,file=paste(sample,after_samples,before_samples,"expressed_transcripts_fpkm.txt",sep="_"),sep="\t",col.names=T,quote=F,row.names = T)
+      write.table(re_lnc,file=paste(sample,after_samples,before_samples,"expressed_transcripts_logFC.txt",sep="_"),sep="\t",col.names=T,quote=F,row.names = F)
+      
+      #filter enriched in After IP
+      expression_lnc <- subset(df_genes_expression, df_genes_expression$filterFPKM_mean == TRUE & row.names(df_genes_expression) %in% re_lnc$id)
+      re_lnc <- subset(re_lnc,re_lnc$id %in% row.names(expression_lnc))
+      write.table(expression_lnc,file=paste(sample,after_samples,before_samples,"expressed_transcripts_fpkm_enrichedAfterIP.txt",sep="_"),sep="\t",col.names=T,quote=F,row.names = T)
+      write.table(re_lnc,file=paste(sample,after_samples,before_samples,"expressed_transcripts_logFC_enrichedAfterIP.txt",sep="_"),sep="\t",col.names=T,quote=F,row.names = F)
+    }else{
+      #filter only lnc significant
+      re_lnc <- subset(results_genes, results_genes$qval < 0.05 & substring(results_genes$id,1,3) == 'LNC')
+      expression_lnc <- subset(df_genes_expression, row.names(df_genes_expression) %in% re_lnc$id)
+      write.table(expression_lnc,file=paste(sample,after_samples,before_samples,"expressed_transcripts_fpkm_matched.txt",sep="_"),sep="\t",col.names=T,quote=F,row.names = T)
+      write.table(re_lnc,file=paste(sample,after_samples,before_samples,"expressed_transcripts_logFC_matched.txt",sep="_"),sep="\t",col.names=T,quote=F,row.names = F)
+      
+      #filter enriched in After IP
+      expression_lnc <- subset(df_genes_expression, df_genes_expression$filterFPKM_mean == TRUE & row.names(df_genes_expression) %in% re_lnc$id)
+      re_lnc <- subset(re_lnc,re_lnc$id %in% row.names(expression_lnc))
+      write.table(expression_lnc,file=paste(sample,after_samples,before_samples,"expressed_transcripts_fpkm_enrichedAfterIP_matched.txt",sep="_"),sep="\t",col.names=T,quote=F,row.names = T)
+      write.table(re_lnc,file=paste(sample,after_samples,before_samples,"expressed_transcritps_logFC_enrichedAfterIP_matched.txt",sep="_"),sep="\t",col.names=T,quote=F,row.names = F)
+    }
+    
+    
   }
   
 }
@@ -270,27 +352,50 @@ runBallgownSubsets("Mlet7",7,5,FALSE)
 
 
 ################################### Plot FPKMs
-library(tidyr)
-setwd("E:\\masterpraktikum\\mouse")
-
-# df <- subset(df_genes_expression[df_genes_expression$filterZero== TRUE,])
-df<-read.csv2(file="test.txt",sep = "\t",row.names=1,header=T)
-size=4
-df_2 <- gather(df[,1:8],"Sample","FPKM",1:(2*size))
-df_2$Type <- substring(df_2$Sample,1,10)
-df_2$Replicate <- substring(df_2$Sample,11,12)
-
-ggplot(df_2,aes(as.numeric(as.character(FPKM)),fill=Type)) + 
-    geom_density(alpha = 0.4) + scale_x_continuous( trans='log2') + 
-    xlim(0,50) + scale_fill_manual(values=c("After","Before")) +
-    xlab("FPKM") + ggtitle(paste("FPKM distribution ",sample,sep=""))
-
-ggplot(df_2,aes(x=Type, y=as.numeric(as.character(FPKM)),fill=Replicate)) + 
-    geom_boxplot(alpha = 0.4) + scale_y_log10() + ylab("log10(FPKM)") + xlab("Condition") + 
-     ggtitle(paste("FPKM distribution ",sample,sep=""))
-
-df<-read.csv2(file="overlaps_lnc.txt",sep="\t",header=F)
-ggplot(df, aes(x=as.numeric(as.character(V1)))) + geom_step(aes(y=..y..),stat="ecdf",size=1) +
-    xlab("Overlaps") + ylab("cummulative frequency of overlaps") + ggtitle("Cummulative plot LNC - overlaps") + scale_x_log10()
+# library(tidyr)
+# setwd("E:\\masterpraktikum\\mouse")
+# 
+# # df <- subset(df_genes_expression[df_genes_expression$filterZero== TRUE,])
+# df<-read.csv2(file="/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/data/statistics/lncRNA/mm10/overlapGenes/overlaps_plot.txt",sep = "\t",header=F)
+# ggplot(df, aes(x=as.numeric(as.character(V1)))) + geom_step(aes(y=..y..),stat="ecdf",size=1) +
+#   xlab("Overlaps") + ylab("cummulative frequency of overlaps") + ggtitle("Cummulative plot LNC - overlaps") + scale_x_log10()
+# 
+# 
 
 
+
+####################
+# 
+# size=4
+# df_2 <- gather(df[,1:8],"Sample","FPKM",1:(2*size))
+# df_2$Type <- substring(df_2$Sample,1,10)
+# df_2$Replicate <- substring(df_2$Sample,11,12)
+# 
+# ggplot(df_2,aes(as.numeric(as.character(FPKM)),fill=Type)) + 
+#     geom_density(alpha = 0.4) + scale_x_continuous( trans='log2') + 
+#     xlim(0,50) + scale_fill_manual(values=c("After","Before")) +
+#     xlab("FPKM") + ggtitle(paste("FPKM distribution ",sample,sep=""))
+# 
+# 
+# ggplot(df_2,aes(x=Type, y=as.numeric(as.character(FPKM)),fill=Replicate)) + 
+#     geom_boxplot(alpha = 0.4) + scale_y_log10() + ylab("log10(FPKM)") + xlab("Condition") + 
+#      ggtitle(paste("FPKM distribution ",sample,sep=""))
+# 
+# df<-read.csv2(file="overlaps_lnc.txt",sep="\t",header=F)
+# ggplot(df, aes(x=as.numeric(as.character(V1)))) + geom_step(aes(y=..y..),stat="ecdf",size=1) +
+#     xlab("Overlaps") + ylab("cummulative frequency of overlaps") + ggtitle("Cummulative plot LNC - overlaps") + scale_x_log10()
+# 
+# 
+# adjusted_results = stattest(bg_filtered, pData=pData(bg_filtered), feature='transcript', meas='FPKM', covariate="group", getFC=TRUE)
+# results_genes <- arrange(adjusted_results, qval)
+# head(results_genes)
+# 
+# matched_pair= factor(rep(1:subset_size,2))
+# matched_pair
+# mod = model.matrix(~matched_pair + pData(bg_filtered)$group)
+# mod0 = model.matrix(~ pData(bg_filtered)$group)
+# adjusted_results = stattest(bg_filtered, pData=pData(bg_filtered), feature='transcript', meas='FPKM', mod0=mod0, mod=mod)
+# results_genes <- arrange(adjusted_results, qval)
+# head(results_genes)
+# 
+# 

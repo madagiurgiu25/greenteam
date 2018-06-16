@@ -100,7 +100,7 @@ def mergeGenes(gtfFile, overlapsFile,mappingFile, out):
                         continue
 
                     # change for each entry which is a subgene the parent gene (superGene)
-                    if geneid in subGenesDict:
+                    if geneid in subGenesDict and row[2] != 'gene':
                         # print(l)
                         # print(geneid)
                         # print(subGenesDict[geneid])
@@ -249,4 +249,4 @@ if __name__ == "__main__":
     # findOverlaps("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/data/mapping/mm10_primary_assembly_and_lncRNA.gtf")
     # findOverlaps("mm10_primary_assembly_and_lncRNA.json")
     # findOverlaps_lnc2gene("mm10_primary_assembly_and_lncRNA.gtf")
-    mergeGenes("mm10_primary_assembly_and_lncRNA.gtf","overlaps_formatted.txt","mapping_keys.json","mm10_primary_assembly_and_lncRNA_supergenes.gtf")
+    # mergeGenes("mm10_primary_assembly_and_lncRNA.gtf","/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/data/statistics/lncRNA/mm10/overlapGenes/overlaps_formatted.txt","../mapping_keys.json","mm10_primary_assembly_and_lncRNA_supergenes.gtf")
