@@ -24,6 +24,9 @@ TRANSCRIPT = 'transcript'
 UTR = 'UTR'
 CDS = 'CDS'
 
+# max number of gene overlapping partners (those parent genes will be ignored)
+NMAX = 20
+
 # create super genes
 def mergeGenes(gtfFile, overlapsFile,mappingFile, out):
 
@@ -38,6 +41,7 @@ def mergeGenes(gtfFile, overlapsFile,mappingFile, out):
 
     subGenesDict = {}
     superGeneDict = {}
+    blacklist = []
     # create a dictionary using the overlaps. Each LNC has a parent which can be either
     # same lnc or a different on. Of course there is 1 Parent per LNC
     try:
@@ -69,6 +73,13 @@ def mergeGenes(gtfFile, overlapsFile,mappingFile, out):
                             superGeneDict[supergene] = []
                         superGeneDict[supergene].append(subgene)
 
+        # check genes which overlap with more than NMAX
+        # add them to the black list
+        for key in superGeneDict:
+            if len(superGeneDict[key]) >= NMAX:
+                print(key)
+                blacklist.append(key)
+
         ## create new GTF
         newgtf = open(out,'w')
         # create genes dict
@@ -84,13 +95,17 @@ def mergeGenes(gtfFile, overlapsFile,mappingFile, out):
                 if geneid is not None:
                     geneid = geneid.group(1)
 
+                    # ignore genes on black list / remove from GTF
+                    if geneid in blacklist:
+                        continue
+
                     # write everything that is not noncoding
                     if geneid.startswith("LNC") == False:
                         newgtf.write(l)
                         continue
 
                     # write everything no change if the gene is a superGene
-                    if geneid in superGeneDict:
+                    if geneid in superGeneDict and geneid not in blacklist:
                         newgtf.write(l)
                         continue
 
@@ -99,8 +114,13 @@ def mergeGenes(gtfFile, overlapsFile,mappingFile, out):
                         newgtf.write(l)
                         continue
 
+                    # gene is a subgene but the supergene is on the blacklist
+                    if geneid in subGenesDict and subGenesDict[geneid] in blacklist:
+                        newgtf.write(l)
+                        continue
+
                     # change for each entry which is a subgene the parent gene (superGene)
-                    if geneid in subGenesDict and row[2] != 'gene':
+                    if geneid in subGenesDict and row[2] != 'gene' and subGenesDict[geneid] not in blacklist:
                         # print(l)
                         # print(geneid)
                         # print(subGenesDict[geneid])
@@ -249,4 +269,4 @@ if __name__ == "__main__":
     # findOverlaps("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/data/mapping/mm10_primary_assembly_and_lncRNA.gtf")
     # findOverlaps("mm10_primary_assembly_and_lncRNA.json")
     # findOverlaps_lnc2gene("mm10_primary_assembly_and_lncRNA.gtf")
-    # mergeGenes("mm10_primary_assembly_and_lncRNA.gtf","/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/data/statistics/lncRNA/mm10/overlapGenes/overlaps_formatted.txt","../mapping_keys.json","mm10_primary_assembly_and_lncRNA_supergenes.gtf")
+    mergeGenes("mm10_primary_assembly_and_lncRNA.gtf","/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/data/statistics/lncRNA/mm10/overlapGenes/overlaps_formatted.txt","../mapping_keys.json","mm10_primary_assembly_and_lncRNA_supergenes_exclude20.gtf")
