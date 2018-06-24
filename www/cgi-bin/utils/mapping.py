@@ -2,6 +2,7 @@
 #!C:\\Python34\\python.exe
 
 import json
+import re
 count = 0
 ALIAS = 'alias'
 SPECIES = 'species'
@@ -145,6 +146,92 @@ def addGeneEntrie(gtf):
     except FileNotFoundError:
         print("your file does not exist")
 
+
+def addGeneTranscriptEntry(gtf):
+
+    dict_genes = {}
+    list_trascript_start_stop = "list_intervals"
+    list_exons_start_stop = "list_exons"
+    transcript_list = "transcript_list"
+    current_gene_id = ""
+    current_strand = ""
+    current_chr = ""
+    chr="chr"
+    strand="strand"
+
+    try:
+        fout=open(gtf + "_withgenes", "w")
+        with open(gtf, "r") as f:
+            for line in f:
+
+                if line.startswith("#"):
+                    fout.write(line)
+                    continue
+                else:
+                    arr = line.strip().replace("\n","").split("\t")
+
+                    fout.write(line)
+                    # check if transcript on same gene and save start stop
+                    info_row = arr[8]
+                    start = int(arr[3])
+                    stop = int(arr[4])
+                    current_strand = arr[6]
+                    current_chr = arr[0]
+                    info_arr = info_row.replace("\"","").split(";")
+
+                    geneid = re.search("gene_id \"(.*?)\";", arr[8], flags=0)
+                    if geneid:
+                        geneid = geneid.group(1)
+
+                    transcriptid = re.search("transcript_id \"(.*?)\";", arr[8], flags=0)
+                    if transcriptid:
+                        transcriptid = transcriptid.group(1)
+
+
+                    if geneid in dict_genes:
+                        dict_genes[geneid][list_trascript_start_stop].append(start)
+                        dict_genes[geneid][list_trascript_start_stop].append(stop)
+                    else:
+                        dict_genes[geneid] = {}
+                        dict_genes[geneid][chr]=current_chr
+                        dict_genes[geneid][strand]=current_strand
+                        dict_genes[geneid][list_trascript_start_stop] = []
+                        dict_genes[geneid][list_trascript_start_stop].append(start)
+                        dict_genes[geneid][list_trascript_start_stop].append(stop)
+                        dict_genes[geneid][transcript_list] = {}
+
+                    if transcriptid in dict_genes[geneid][transcript_list]:
+                        dict_genes[geneid][transcript_list][transcriptid][list_exons_start_stop].append(start)
+                        dict_genes[geneid][transcript_list][transcriptid][list_exons_start_stop].append(stop)
+                    else:
+                        dict_genes[geneid][transcript_list][transcriptid] = {}
+                        dict_genes[geneid][transcript_list][transcriptid][chr] = current_chr
+                        dict_genes[geneid][transcript_list][transcriptid][strand] = current_strand
+                        dict_genes[geneid][transcript_list][transcriptid][list_exons_start_stop] = []
+                        dict_genes[geneid][transcript_list][transcriptid][list_exons_start_stop].append(start)
+                        dict_genes[geneid][transcript_list][transcriptid][list_exons_start_stop].append(stop)
+
+            for k in dict_genes:
+                current_chr=dict_genes[k][chr]
+                current_strand=dict_genes[k][strand]
+                current_gene_id=k
+                max_stop = max(dict_genes[k][list_trascript_start_stop])
+                min_start = min(dict_genes[k][list_trascript_start_stop])
+
+                fout.write(("{0}\tCufflinks\tgene\t{1}\t{2}\t0\t{3}\t.\tgene_id \"{4}\";\n").format(current_chr,min_start,max_stop,current_strand,current_gene_id))
+                for t in dict_genes[k][transcript_list]:
+                    current_chr=dict_genes[k][transcript_list][t][chr]
+                    current_strand=dict_genes[k][transcript_list][t][strand]
+                    current_transcript_id=k
+                    max_stop = max(dict_genes[k][transcript_list][t][list_trascript_start_stop])
+                    min_start = min(dict_genes[k][transcript_list][t][list_trascript_start_stop])
+                    fout.write(("{0}\tCufflinks\ttranscript\t{1}\t{2}\t0\t{3}\t.\tgene_id \"{4}\"; transcript_id \"{5}\";\n").format(current_chr,min_start,max_stop,current_strand,current_gene_id,current_transcript_id))
+            fout.close()
+
+    except FileNotFoundError:
+        print("your file does not exist")
+
+
 if __name__ == "__main__":
 
     ################ Assgin unique keys #####################
@@ -154,18 +241,19 @@ if __name__ == "__main__":
     # addGeneEntrie("NONCODEv5_mouse_mm10_lncRNA.gtf")
     # addGeneEntrie("NONCODEv5_human_hg38_lncRNA.gtf")
     # addGeneEntrie("lncrnadb_mm10.gtf")
+    addGeneTranscriptEntry("lncipedia_5_0_hc_hg38_sorted.gtf")
 
 
    ################ Mapping keyes #####################
-    fin = open("mapping_keys.txt","r").readlines()
-    dict_mapping = {}
-    for l in fin:
-        arr = l.split("\t")
-        if str(arr[0]).startswith("#") == False:
-            dict_mapping[arr[1]] = arr[0]
-    replaceKeyGTF("lncrnadb_mm10.gtf_withgenes",dict_mapping)
-    replaceKeyGTF("NONCODEv5_mouse_mm10_lncRNA.gtf_withgenes",dict_mapping)
-    replaceKeyGTF("NONCODEv5_human_hg38_lncRNA.gtf_withgenes",dict_mapping)
+    # fin = open("mapping_keys.txt","r").readlines()
+    # dict_mapping = {}
+    # for l in fin:
+    #     arr = l.split("\t")
+    #     if str(arr[0]).startswith("#") == False:
+    #         dict_mapping[arr[1]] = arr[0]
+    # replaceKeyGTF("lncrnadb_mm10.gtf_withgenes",dict_mapping)
+    # replaceKeyGTF("NONCODEv5_mouse_mm10_lncRNA.gtf_withgenes",dict_mapping)
+    # replaceKeyGTF("NONCODEv5_human_hg38_lncRNA.gtf_withgenes",dict_mapping)
 
     # replaceKeyGTF("gencode.vM17.long_noncoding_RNAs.gtf",dict_mapping)
     # replaceKeyGTF("gencode.v28.long_noncoding_RNAs.gtf",dict_mapping)
