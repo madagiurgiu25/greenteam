@@ -179,14 +179,15 @@ def addGeneTranscriptEntry(gtf):
                     current_chr = arr[0]
                     info_arr = info_row.replace("\"","").split(";")
 
-                    geneid = re.search("gene_id \"(.*?)\";", arr[8], flags=0)
+                    geneid = re.search("gene_id \"(.*?)\" ;", arr[8], flags=0)
                     if geneid:
                         geneid = geneid.group(1)
 
-                    transcriptid = re.search("transcript_id \"(.*?)\";", arr[8], flags=0)
+                    transcriptid = re.search("transcript_id \"(.*?)\" ;", arr[8], flags=0)
                     if transcriptid:
                         transcriptid = transcriptid.group(1)
 
+                    print(str(geneid) + "\t" + str(transcriptid))
 
                     if geneid in dict_genes:
                         dict_genes[geneid][list_trascript_start_stop].append(start)
@@ -223,8 +224,8 @@ def addGeneTranscriptEntry(gtf):
                     current_chr=dict_genes[k][transcript_list][t][chr]
                     current_strand=dict_genes[k][transcript_list][t][strand]
                     current_transcript_id=k
-                    max_stop = max(dict_genes[k][transcript_list][t][list_trascript_start_stop])
-                    min_start = min(dict_genes[k][transcript_list][t][list_trascript_start_stop])
+                    max_stop = max(dict_genes[k][transcript_list][t][list_exons_start_stop])
+                    min_start = min(dict_genes[k][transcript_list][t][list_exons_start_stop])
                     fout.write(("{0}\tCufflinks\ttranscript\t{1}\t{2}\t0\t{3}\t.\tgene_id \"{4}\"; transcript_id \"{5}\";\n").format(current_chr,min_start,max_stop,current_strand,current_gene_id,current_transcript_id))
             fout.close()
 
