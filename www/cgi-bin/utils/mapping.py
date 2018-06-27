@@ -7,6 +7,7 @@ count = 0
 ALIAS = 'alias'
 SPECIES = 'species'
 TYPE = 'type'
+CHR = 'chr'
 
 def addKeys(file, type, type_long, species, dict ):
     global count
@@ -49,9 +50,15 @@ def insertPKinJSON(file):
 connector = " "
 def replaceKeyGTF(gtf,mapObj):
 
-    fout=open(gtf + "_newkeys", "w")
-
     try:
+        fout=open(gtf + "_newkeys", "w")
+
+        # fmap = open("../mapping_keys.txt", "a")
+        # count_tr = 733858
+        #
+        # with open('../mapping_keys.json') as f:
+        #     mapObjNew = json.load(f)
+
         with open(gtf, "r") as f:
             for line in f:
                 if str(line).startswith("#"):
@@ -64,20 +71,43 @@ def replaceKeyGTF(gtf,mapObj):
                     info_tail = []
                     for item in info_arr:
                         if len(item.strip())>0:
-                            (key,val) = item.strip().split(" ")
-                            if key in ["gene_id","transcript_id"]:
-                                if val in mapObj:
-                                    info_tail.append(key + connector + "\"" + mapObj[val] + "\"" )
-                                    info_tail.append(key + "_alias" + connector + "\"" + val + "\"")
+                            splitvals = item.strip().split(" ")
+                            if len(splitvals) == 2:
+                                (key,val) = splitvals
+                                if key in ["gene_id","transcript_id"]:
+                                    # if key == "gene_id":
+                                    #     type = "GE"
+                                    #     type_long = "GENE"
+                                    # else:
+                                    #     type = "TR"
+                                    #     type_long = "TRANSCRIPT"
+                                    # if val not in mapObj: # assign extra keys
+                                    #     key_map = "LNC_" + type + "_" + "hg38" + "_" + str(count_tr).zfill(8)
+                                    #     mapObjNew[key_map] = {}
+                                    #     mapObjNew[key_map][ALIAS] = val
+                                    #     mapObjNew[key_map][SPECIES] = "hg38"
+                                    #     mapObjNew[key_map][TYPE] = type_long
+                                    #     count_tr = count_tr + 1
+                                    #     print(key_map + " " + val + " " + type + " " + type_long)
+                                    #     fmap.write(key_map   + "\t" + mapObjNew[key_map][ALIAS] + "\t" + mapObjNew[key_map][SPECIES] + "\t" + mapObjNew[key_map][TYPE] + "\n")
+                                    #     mapObj[val] = key_map
+                                    if val in mapObj: # find LNC key
+                                        info_tail.append(key + connector + "\"" + mapObj[val] + "\"" )
+                                        info_tail.append(key + "_alias" + connector + "\"" + val + "\"")
+                                    else:
+                                        info_tail.append(key + connector + "\"" + val + "\"")
                                 else:
                                     info_tail.append(key + connector + "\"" + val + "\"")
                             else:
-                                info_tail.append(key + connector + "\"" + val + "\"")
+                                print("error with space " + item)
                     string_tail = "; ".join(info_tail)
                     info_head.append(string_tail)
                     fout.write("\t".join(info_head) + "\n")
         fout.close()
-
+        # fmap.close()
+        # with open("../mapping_keys.json", 'w') as outfile:
+        #     json.dump(mapObjNew, outfile, indent=4)
+        # outfile.close()
     except FileNotFoundError:
         print("your file does not exist")
 
@@ -242,20 +272,23 @@ if __name__ == "__main__":
     # addGeneEntrie("NONCODEv5_mouse_mm10_lncRNA.gtf")
     # addGeneEntrie("NONCODEv5_human_hg38_lncRNA.gtf")
     # addGeneEntrie("lncrnadb_mm10.gtf")
-    addGeneTranscriptEntry("lncipedia_5_0_hc_hg38_sorted.gtf")
+    # addGeneTranscriptEntry("lncipedia_5_0_hc_hg38_sorted.gtf")
 
 
    ################ Mapping keyes #####################
-    # fin = open("mapping_keys.txt","r").readlines()
-    # dict_mapping = {}
-    # for l in fin:
-    #     arr = l.split("\t")
-    #     if str(arr[0]).startswith("#") == False:
-    #         dict_mapping[arr[1]] = arr[0]
+    fin = open("../mapping_keys.txt","r").readlines()
+    dict_mapping = {}
+    for l in fin:
+        arr = l.split("\t")
+        if str(arr[0]).startswith("#") == False:
+            dict_mapping[arr[1]] = arr[0]
     # replaceKeyGTF("lncrnadb_mm10.gtf_withgenes",dict_mapping)
     # replaceKeyGTF("NONCODEv5_mouse_mm10_lncRNA.gtf_withgenes",dict_mapping)
     # replaceKeyGTF("NONCODEv5_human_hg38_lncRNA.gtf_withgenes",dict_mapping)
 
     # replaceKeyGTF("gencode.vM17.long_noncoding_RNAs.gtf",dict_mapping)
     # replaceKeyGTF("gencode.v28.long_noncoding_RNAs.gtf",dict_mapping)
+
+    replaceKeyGTF("hg38_long_noncoding_lncipedia.gtf",dict_mapping)
+
 

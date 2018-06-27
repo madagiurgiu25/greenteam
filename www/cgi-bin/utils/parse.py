@@ -198,8 +198,6 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
         with open(gtffile, "r") as f:
             for line in f:
                 count += 1
-                print(count)
-                # print(count)
                 if line.startswith("#") is False: # ignore header lines
                     arr = line.strip("\n").replace('"',"").split("\t")
 
@@ -579,27 +577,72 @@ def parseBed2Json(bedfile):
         print("your file does not exist")
 
 
+
+def parseJSON2GTF_lncrnadb(jsonFile,out):
+
+    dict_genes = {}
+
+    fout = open(out,"w")
+    with open(jsonFile, 'r') as f:
+        dict_entries = json.load(f)
+
+    for item in dict_entries:
+        if len(item[GENE_ID]) > 0 and len(item[TRANSCRIPT_ID]) > 0:
+            fout.write("{0}\tlncrnadb\ttranscript\t{1}\t{2}\t0\t{3}\t.\tgene_id \"{4}\"; transcript_id \"{5}\"\n").format(item[CHR],
+                                                                                                                        item["transcript_start"],
+                                                                                                                        item["transcript_stop"],
+                                                                                                                        item["strand"],
+                                                                                                                        item[GENE_ID],
+                                                                                                                        item[TRANSCRIPT_ID])
+            fout.write("{0}\tlncrnadb\texon\t{1}\t{2}\t0\t{3}\t.\tgene_id \"{4}\"; transcript_id \"{5}\"\n").format(item[CHR],
+                                                                                                                    item["transcript_start"],
+                                                                                                                    item["transcript_stop"],
+                                                                                                                    item["strand"],
+                                                                                                                    item[GENE_ID],
+                                                                                                                    item[TRANSCRIPT_ID])
+            if item[GENE_ID] not in dict_genes:
+                dict_genes[item[GENE_ID]] = {}
+                dict_genes[item[GENE_ID]][CHR] = item[CHR]
+                dict_genes[item[GENE_ID]][STRAND] = item[STRAND]
+                dict_genes[item[GENE_ID]]["pos"] = []
+            dict_genes[item[GENE_ID]]["pos"].append(int(item["transcript_start"]))
+            dict_genes[item[GENE_ID]]["pos"].append(int(item["transcript_stop"]))
+
+
+    for k in dict_genes:
+        min_pos = min(dict_genes[k]["pos"])
+        max_pos = max(dict_genes[k]["pos"])
+        fout.write("{0}\tlncrnadb\texon\t{1}\t{2}\t0\t{3}\t.\tgene_id \"{4}\"; transcript_id \"{5}\"\n").format(dict_genes[k][CHR],
+                                                                                                                min_pos,
+                                                                                                                max_pos,
+                                                                                                                dict_genes[k][STRAND],
+                                                                                                                   k)
+    fout.close()
+
 if __name__ == "__main__":
 
-    ############ parse generic BED file with header to json
-    if len(sys.argv) == 2:
-        file = sys.argv[1]
-        parseBed2Json(file)
-    else:
-        ########### parse GTF file to BED and json
-        file = sys.argv[1]
-        assembly = sys.argv[2]
-        source = sys.argv[3]
-        bedfile = sys.argv[4]
-        jsonfile = sys.argv[5]
+    #### parse lncrnadb json to gtf
+    parseJSON2GTF_lncrnadb("lncrnadb_hg38.json",'lncrnadb_hg38.gtf')
 
-        if len(sys.argv) >= 7:
-            type = sys.argv[6]
-            if len(sys.argv) ==8:
-                type_transcript = sys.argv[7]
-                ########### parse GTF file to BED and json with type
-                parseGTF(file,bedfile,jsonfile,assembly,source,type,type_transcript)
-            else:
-                parseGTF(file,bedfile,jsonfile,assembly,source,type)
-        else:
-            parseGTF(file,bedfile,jsonfile,assembly,source)
+    ############ parse generic BED file with header to json
+    # if len(sys.argv) == 2:
+    #     file = sys.argv[1]
+    #     parseBed2Json(file)
+    # else:
+    #     ########### parse GTF file to BED and json
+    #     file = sys.argv[1]
+    #     assembly = sys.argv[2]
+    #     source = sys.argv[3]
+    #     bedfile = sys.argv[4]
+    #     jsonfile = sys.argv[5]
+    #
+    #     if len(sys.argv) >= 7:
+    #         type = sys.argv[6]
+    #         if len(sys.argv) ==8:
+    #             type_transcript = sys.argv[7]
+    #             ########### parse GTF file to BED and json with type
+    #             parseGTF(file,bedfile,jsonfile,assembly,source,type,type_transcript)
+    #         else:
+    #             parseGTF(file,bedfile,jsonfile,assembly,source,type)
+    #     else:
+    #         parseGTF(file,bedfile,jsonfile,assembly,source)
