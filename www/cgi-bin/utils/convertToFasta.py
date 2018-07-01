@@ -34,6 +34,39 @@ def __getFasta__(fastaFile, keysFile,type):
     fin.close()
     fout.close()
 
+def __getFasta2__(fastaFile, chrFile):
+
+    fin = open(chrFile,"r")
+    dict = {}
+
+    for l in fin.readlines():
+        if l.startswith("#") == False:
+            chr = l.strip().replace("\n","").split("\t|>")[0]
+            dict[chr] = ""
+    fin.close()
+
+    fin = open(fastaFile,'r')
+    fout = open("out.fasta",'w')
+
+    continueRead = False
+    for l in fin.readlines():
+
+        if l.startswith(">"):
+            if continueRead == True:
+                continueRead = False
+            header = l[1:].split(" ")
+            print(header)
+            if header[0] in dict:
+                fout.write(l)
+                continueRead = True
+        else:
+            if continueRead == True:
+                fout.write(l)
+
+    fin.close()
+    fout.close()
+
 if __name__ == "__main__":
     # __getFasta__("gencode.vM17.transcripts.fa","mm10.bed","transcript")
-    __getFasta__("gencode.v28.transcripts.fa", "hg38.bed", "transcript")
+    # __getFasta__("gencode.v28.transcripts.fa", "hg38.bed", "transcript")
+    __getFasta2__("GRCh38.genome.fa", "chr.txt")

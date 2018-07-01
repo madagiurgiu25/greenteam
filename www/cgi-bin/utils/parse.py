@@ -198,8 +198,6 @@ def parseGTF(gtffile,bedoutput,jsonoutput, assembly, source, type=None, type_tra
         with open(gtffile, "r") as f:
             for line in f:
                 count += 1
-                print(count)
-                # print(count)
                 if line.startswith("#") is False: # ignore header lines
                     arr = line.strip("\n").replace('"',"").split("\t")
 
@@ -579,9 +577,84 @@ def parseBed2Json(bedfile):
         print("your file does not exist")
 
 
+
+def parseJSON2GTF_lncrnadb(jsonFile,out):
+
+    dict_genes = {}
+
+    fout = open(out,"w")
+    with open(jsonFile, 'r') as f:
+        dict_entries = json.load(f)
+
+    for item in dict_entries:
+        if len(item[GENE_ID]) > 0 and len(item[TRANSCRIPT_ID]) > 0:
+            start = str(item["transcript_start"])
+            stop =  str(item["transcript_stop"])
+            tr = item[TRANSCRIPT_ID].replace(" ","_")
+            gene = item[GENE_ID].replace(" ","_")
+            fout.write(item[CHR] + "\tlncrnadb\ttranscript\t" + start + "\t" + stop + "\t0\t" + item["strand"] + "\t.\tgene_id \"" +  gene + "\"; transcript_id \"" + tr  + "\";\n")
+            fout.write(item[CHR] + "\tlncrnadb\texon\t" + start + "\t" + stop + "\t0\t" + item["strand"] + "\t.\tgene_id \"" +  gene + "\"; transcript_id \"" + tr + "\";\n")
+
+            if gene not in dict_genes:
+                dict_genes[gene] = {}
+                dict_genes[gene][CHR] = item[CHR]
+                dict_genes[gene][STRAND] = item[STRAND]
+                dict_genes[gene]["pos"] = []
+            dict_genes[gene]["pos"].append(int(item["transcript_start"]))
+            dict_genes[gene]["pos"].append(int(item["transcript_stop"]))
+
+
+    for k in dict_genes:
+        min_pos = str(min(dict_genes[k]["pos"]))
+        max_pos = str(max(dict_genes[k]["pos"]))
+        fout.write(dict_genes[k][CHR] + "\tlncrnadb\tgene\t" + min_pos + "\t" + max_pos + "\t0\t" + dict_genes[k][STRAND] + "\t.\tgene_id \"" +  k +  "\";\n")
+    fout.close()
+
+def parseBED2GTF_lncrnadb(bedfile,out):
+
+    dict_genes = {}
+
+    fout = open(out,"w")
+    with open(bedfile, "r") as f:
+        for line in f:
+            if line.startswith("#") is False: # ignore header lines
+                arr = line.strip("\n").replace('"',"").split("\t")
+                chr = arr[0]
+                start = arr[1]
+                stop = arr[2]
+                name = arr[3].split("@")
+                strand = arr[5]
+                geneid = name[0]
+                transcriptid = name[1]
+
+                if len(geneid) > 0 and len(transcriptid) > 0:
+                    fout.write(chr + "\tlncrnadb\ttranscript\t" + start + "\t" + stop + "\t0\t" + strand + "\t.\tgene_id \"" +  geneid + "\"; transcript_id \"" + transcriptid  + "\";\n")
+                    fout.write(chr + "\tlncrnadb\texon\t" + start + "\t" + stop + "\t0\t" + strand + "\t.\tgene_id \"" +  geneid + "\"; transcript_id \"" + transcriptid  + "\";\n")
+
+                    if geneid not in dict_genes:
+                        dict_genes[geneid] = {}
+                        dict_genes[geneid][CHR] = chr
+                        dict_genes[geneid][STRAND] = strand
+                        dict_genes[geneid]["pos"] = []
+                    dict_genes[geneid]["pos"].append(int(start))
+                    dict_genes[geneid]["pos"].append(int(stop))
+
+
+    for k in dict_genes:
+        min_pos = str(min(dict_genes[k]["pos"]))
+        max_pos = str(max(dict_genes[k]["pos"]))
+        fout.write(dict_genes[k][CHR] + "\tlncrnadb\tgene\t" + min_pos + "\t" + max_pos + "\t0\t" + dict_genes[k][STRAND] + "\t.\tgene_id \"" +  k +  "\";\n")
+
+    fout.close()
+
 if __name__ == "__main__":
 
-    ############ parse generic BED file with header to json
+    #### parse lncrnadb json to gtf
+    # parseJSON2GTF_lncrnadb("lncrnadb_hg38.json",'lncrnadb_hg38.gtf')
+    # parseJSON2GTF_lncrnadb("lncrnadb_mm10.json",'lncrnadb_mm10.gtf')
+    # parseBED2GTF_lncrnadb("lncrnadb_hg38_short_clean_clean.bed",'lncrnadb_hg38.gtf')
+
+    ########### parse generic BED file with header to json
     if len(sys.argv) == 2:
         file = sys.argv[1]
         parseBed2Json(file)
