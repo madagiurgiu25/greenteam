@@ -19,10 +19,10 @@ NONCODE='noncode'
 LNCRNADB='lncrnadb'
 COUNT = 'count'
 ALIAS='alias'
-dict_index={'gencode':2,'lncipedia':2,'noncode':2,'lncrnadb':1}
-dict_index_gene={'gencode':0,'lncipedia':0,'noncode':0,'lncrnadb':0}
-dict_positions={'gencode':0,'lncipedia':1,'noncode':2,'lncrnadb':3}
-dict_positions_mouse={'gencode':0,'noncode':1,'lncrnadb':2}
+dict_index={GENCODE:2,LNCIPEDIA:2,NONCODE:2,LNCRNADB:2}
+dict_index_gene={GENCODE:0,LNCIPEDIA:0,NONCODE:0,LNCRNADB:0}
+dict_positions={GENCODE:0,LNCIPEDIA:1,NONCODE:2,LNCRNADB:3}
+dict_positions_mouse={GENCODE:0,NONCODE:1,LNCRNADB:2}
 SOURCE='source'
 
 
