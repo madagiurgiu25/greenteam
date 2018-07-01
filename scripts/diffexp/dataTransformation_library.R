@@ -1,4 +1,4 @@
-# library(ballgown)
+library(ballgown)
 library(dplyr)
 
 translate_transformlog2 <- function(df, size, conditions){
@@ -70,6 +70,8 @@ transformSQRT <- function(df, size, conditions){
 
 quantile_normalization_all <- function(df_trans, size, conditions){
     
+    names_col<-colnames(df_trans)
+  
     fpkm_list <- list()
     for (i in 1:(conditions*size)) {
         df <-
@@ -94,19 +96,18 @@ quantile_normalization_all <- function(df_trans, size, conditions){
     df_norm <- data.frame(z = rep(0, dim(df_trans)[1]))
     row.names(df_norm) <- row.names(df_trans)
     df_norm <- merge(df_norm, fpkm_list[[1]][1], by = 0)
-    colnames(df_norm) <- c("names", "z", paste(sample, "A1", sep = ""))
-    for (i in 2:size) {
+    colnames(df_norm) <- c("names", "z", names_col[1])
+    for (i in 2:(size*conditions)) {
         df_norm <- merge(df_norm, fpkm_list[[i]][1], by.x = "names", by.y = 0)
-        names(df_norm)[i + 2] <- paste(sample, "A", i, sep = "")
+        names(df_norm)[i + 2] <- names_col[i]
     }
-    for (i in (size+1):(size*conditions)) {
-        df_norm <- merge(df_norm, fpkm_list[[i]][1], by.x = "names", by.y = 0)
-        names(df_norm)[i + 2] <- paste(sample, "B", i-size, sep = "")
-    }
-    
+    # for (i in (size+1):(size*conditions)) {
+    #     df_norm <- merge(df_norm, fpkm_list[[i]][1], by.x = "names", by.y = 0)
+    #     names(df_norm)[i + 2] <- paste(sample, "B", i-size, sep = "")
+    # }
     
     row.names(df_norm) <- df_norm$names
-    df_norm <- df_norm[,3:(2+conditions*subset_size)]
+    df_norm <- df_norm[,3:(2+conditions*size)]
     
     return(df_norm)
     
@@ -115,6 +116,7 @@ quantile_normalization_all <- function(df_trans, size, conditions){
 
 quantile_normalization_perCondition <- function(df_trans,size, conditions){
     
+    names_col <- colnames(df_trans)
     before_list <- list()
     after_list <- list()
     for (i in 1:size) {
@@ -151,18 +153,18 @@ quantile_normalization_perCondition <- function(df_trans,size, conditions){
     df_norm <- data.frame(z = rep(0, dim(df_trans)[1]))
     row.names(df_norm) <- row.names(df_trans)
     df_norm <- merge(df_norm, after_list[[1]][1], by = 0)
-    colnames(df_norm) <- c("names", "z", paste(sample, "A1", sep = ""))
+    colnames(df_norm) <- c("names", "z", names_col[1])
     for (i in 2:size) {
         df_norm <- merge(df_norm, after_list[[i]][1], by.x = "names", by.y = 0)
-        names(df_norm)[i + 2] <- paste(sample, "A", i, sep = "")
+        names(df_norm)[i + 2] <- names_col[i]
     }
     for (i in 1:size) {
         df_norm <- merge(df_norm, before_list[[i]][1], by.x = "names", by.y = 0)
-        names(df_norm)[i + 2 + size] <- paste(sample, "B", i, sep = "")
+        names(df_norm)[i + 2 + size] <- names_col[i+size]
     }
-    
+
     row.names(df_norm) <- df_norm$names
-    df_norm <- df_norm[,3:(2+conditions*subset_size)]
+    df_norm <- df_norm[,3:(2+conditions*size)]
     
 }
 
@@ -180,33 +182,31 @@ variance_stabilization <- function(df, size, conditions){
     return(df[])
 }
 
-# callBallgown_2Conditions <- function(bg, df_norm, subset_size){
-# 
-#     pData(bg) = data.frame(id = sampleNames(bg), group = factor(rep(2:1, c(subset_size, subset_size))))
-#     print(pData(bg))
-# 
-#     bg_filtered = subset(bg,
-#                          "ballgown::geneIDs(bg) %in% row.names(df_norm)",
-#                          genomesubset = TRUE)
-# 
-#     matrix <- as.matrix(mutate_all(df_norm, function(x) as.numeric(as.character(x))))
-# 
-#     colnames(matrix) <- colnames(df_norm)
-#     rownames(matrix) <- row.names(df_norm)
-# 
-#     adjusted_results = stattest(
-#         gowntable = matrix,
-#         pData=pData(bg_filtered),
-#         feature = 'gene',
-#         meas = 'FPKM',
-#         covariate="group",
-#         getFC = TRUE,
-#         libadjust = FALSE
-#     )
-#     results_gene <- arrange(adjusted_results, qval)
-#     results_filtered <- subset(results_gene, results_gene$qval < 0.05)
-# 
-#     return(results_filtered)
-# 
-# 
-# }
+callBallgown_2Conditions <- function(bg, df_norm, subset_size){
+
+    pData(bg) = data.frame(id = sampleNames(bg), group = factor(rep(2:1, c(subset_size, subset_size))))
+    print(pData(bg))
+
+    bg_filtered = subset(bg,
+                         "ballgown::geneIDs(bg) %in% row.names(df_norm)",
+                         genomesubset = TRUE)
+
+    matrix <- as.matrix(mutate_all(df_norm, function(x) as.numeric(as.character(x))))
+
+    colnames(matrix) <- colnames(df_norm)
+    rownames(matrix) <- row.names(df_norm)
+
+    adjusted_results = stattest(
+        gowntable = matrix,
+        pData=pData(bg_filtered),
+        feature = 'gene',
+        meas = 'FPKM',
+        covariate="group",
+        getFC = TRUE,
+        libadjust = FALSE
+    )
+    results_gene <- arrange(adjusted_results, qval)
+    results_filtered <- subset(results_gene, results_gene$qval < 0.05)
+
+    return(results_filtered)
+}

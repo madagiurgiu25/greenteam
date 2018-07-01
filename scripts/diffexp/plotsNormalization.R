@@ -25,17 +25,20 @@ qqplotNormDistr <- function (df, size, sample, conditions){
     
     
     par(mfcol = c(2, size))
-    mean_fit <- as.numeric(as.character(mean(df_2$FPKM)))
-    min_fit <- as.numeric(as.character(min(df_2$FPKM)))
-    max_fit <- as.numeric(as.character(max(df_2$FPKM)))
-    
-    norm_distr <- rnorm(dim(df)[1], mean_fit, 1)
-    print(head(norm_distr))
     
     for (i in 1:size) {
         data <-
             subset(df_2,
                    df_2$Replicate == i & df_2$Type == paste(sample, "B", sep = ""))
+        
+        mean_fit <- mean(as.numeric(as.character(data$FPKM)))
+        min_fit <- max(as.numeric(as.character(data$FPKM)))
+        max_fit <- min(as.numeric(as.character(data$FPKM)))
+        sd_fit <- sd(as.numeric(as.character(data$FPKM)))
+        
+        norm_distr <- rnorm(dim(data$FPKM)[1], mean_fit, sd_fit)    
+        
+        
         qqplot(
             quantile(norm_distr, probs = seq(0.01, 0.99, 0.01)),
                 y = as.numeric(as.character(data$FPKM)),

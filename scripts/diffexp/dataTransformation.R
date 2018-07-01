@@ -1,6 +1,4 @@
 #!/usr/bin/env Rscript
-install.packages("BiocInstaller", repos = "http://bioconductor.org/packages/3.2/bioc")
-setwd("E:\\masterpraktikum\\mouse")
 library(ballgown)
 library(ggplot2)
 library(gplots)
@@ -31,13 +29,14 @@ conditions = 2
 
 BallgownPATH = "Ballgown"
 TransformationPATH = "Ballgown/Normalization"
-data_directory = ('E:\\masterpraktikum\\mouse\\Ballgown')
+data_directory = ('/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/Ballgown_Supergenes_exclude20/')
 
+setwd("/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/greenteam/scripts/diffexp/")
+source("filtering.R",chdir=T)
+source("plotsNormalization.R",chdir=T)
+source("dataTransformation_library.R",chdir=T)
 
-source("E:\\masterpraktikum\\greenteam\\scripts\\diffexp\\filtering.R")
-source("E:\\masterpraktikum\\greenteam\\scripts\\diffexp\\plotsNormalization.R")
-source("E:\\masterpraktikum\\greenteam\\scripts\\diffexp\\dataTransformation_library.R")
-
+setwd(args[4])
 
 sampleList <- combn(1:size, subset_size, simplify = FALSE)
 
@@ -137,7 +136,7 @@ qqplotFPKM
 ####################################################################################
 ####################################################################################
 #  variance stabilization + Quantile Normalisierung 
-df_trans <-variance_stabilization(filtered_data,size,conditions)
+df_trans <-variance_stabilization(filtered_data[,1:(size*conditions)],size,conditions)
 df_norm <- quantile_normalization_perCondition(df_trans,subset_size, conditions)
 
 plotFPKM <- plotHistogram(df_norm,subset_size,sample,conditions,"transformed")
@@ -160,6 +159,7 @@ qqplotFPKM <- qqplotNormDistr(df_trans,subset_size,"FPKM.M103",conditions)
 qqplotFPKM
 
 ########### Quantile Normalization over the 2 conditions
+df_trans <- translate_transformlog2(filtered_data,size,conditions)
 df_norm <- quantile_normalization_perCondition(df_trans,subset_size, conditions)
 
 plotFPKM <- plotHistogram(df_norm,subset_size,sample,conditions,"transformed")
