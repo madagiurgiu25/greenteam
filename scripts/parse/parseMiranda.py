@@ -11,7 +11,7 @@ class ParseMiranda:
 		self.type = type
 		self.source = source
 		self.organism = organism
-		self.my_dir = "./"
+		self.my_dir = ""
 
 	def loadJson(self, file):
 		'''
@@ -65,13 +65,23 @@ class ParseMiranda:
 				return entry
 		return None
 
+	def verifyID(self, lncrna_id):
+		'''
+			input: gencode gene ID and alias: ENSMUSG00000115958.1|ENSMUST00000193888.5|UTR1
+			return: gencode gene ID: ENSMUSG00000115958.1
+		'''
+		name_array = lncrna_id.split("|") # => ENSMUSG00000003344.14-Upstream-1000
+		name_array2 = name_array[0].split("-") # => ENSMUSG00000003344.14
+		#print(name_array2[0])
+		return name_array2[0]
 
 	def getMirandaInteractions(self, input, output):
 		container = []
 		for line in input:
 			line_array = line.split("\t")
 			mirna = line_array[0]
-			lncrna = line_array[1]
+			transcript_id = self.verifyID(line_array[1])
+			print(transcript_id)
 			container_interactions = {}
 			container_interactions['align_score'] = line_array[2]
 			container_interactions['energy'] = line_array[3]
@@ -85,9 +95,10 @@ class ParseMiranda:
 			container_interactions['mirna_alignment'] = line_array[11]
 			container_interactions['alignment'] = line_array[12]
 			container_interactions['lncrna_alignment'] = line_array[13].rstrip()
+	
+			if self.type == 'lncrna':
+				transcript_id = self.getMappedToUniqueID(transcript_id)
 
-			transcript_id = None	
-			transcript_id = self.getMappedToUniqueID(lncrna)
 			if transcript_id:
 				container_genes = {}
 				container_transcripts = {}
@@ -103,7 +114,6 @@ class ParseMiranda:
 							for transcript in gene['transcript_list']:
 								if(transcript and transcript['transcript_id'] == transcript_id):
 									new_transcript = 0
-									#print("existing gene, existing transcript: " + gene_id + "\t" + transcript_id)
 									new_micro = 1
 									for micro in transcript['interaction_list']:
 										if(micro and micro['mirna'] == mirna):
@@ -117,18 +127,19 @@ class ParseMiranda:
 										container_mirnas['alignment_list'].append(container_interactions)
 										transcript['interaction_list'].append(container_mirnas)
 
-									#transcript['interaction_list'].append(container_interactions)
 							if new_transcript == 1:
 								print("existing gene, but new transcript, hence new mirna: " + gene_id + "\t" + transcript_id + "\t" + mirna)
 								container_mirnas['mirna'] = mirna
 								container_mirnas['alignment_list'] = []
 								container_mirnas['alignment_list'].append(container_interactions)
 
-								transcript['transcript_id'] = transcript_id
-								transcript['interaction_list'] = []
-								transcript['interaction_list'].append(container_mirnas)
+								container_transcripts['transcript_id'] = transcript_id
+								container_transcripts['interaction_list'] = []
+								container_transcripts['interaction_list'].append(container_mirnas)
+
+								gene['transcript_list'].append(container_transcripts)
 					else:
-						print("new gene, new transcript, new mirna")
+						print("new gene, new transcript, new mirna: " + gene_id + "\t" + transcript_id + "\t" + mirna)
 						container_genes['gene_id'] = gene_id
 						container_genes['gene_type'] = self.type
 						container_genes['organism'] = self.organism
@@ -147,24 +158,37 @@ class ParseMiranda:
 					if container_genes:
 						container.append(container_genes)
 			else:
-				print("ERROR: no transcript ID mapping for: " + lncrna)
+				print("ERROR: no transcript ID mapping")
 		output.write(json.dumps(container, indent=4)) 
 	
 if __name__ == '__main__':
-	input_file   	= sys.argv[1]
-	input_source 	= sys.argv[2]
-	input_type 		= sys.argv[3]
-	input_organism	= sys.argv[4]
+	input_file   			= sys.argv[1]
+	input_source 			= sys.argv[2]
+	input_type 				= sys.argv[3]
+	input_organism			= sys.argv[4]
+	input_genesTranscripts 	= sys.argv[5]
+	input_mappingKeys		= sys.argv[6]
 
 	output_file = input_file.replace(".tsv", ".json")
 	fout = open(output_file, "w")
 
 	mp = ParseMiranda(input_type, input_source, input_organism)
 
-	df_mapping_ids = mp.loadJson("mapping_keys.json")
-	df_mapping_gts = mp.loadJson("genestranscripts.json")
+	df_mapping_ids = mp.loadJson(input_mappingKeys)
+	df_mapping_gts = mp.loadJson(input_genesTranscripts)
 	fin = mp.loadTsv(input_file, 1)
+
 	mp.getMirandaInteractions(fin, fout)
 
-# python3 parseMiranda.py miranda_noncode_test.tsv noncode lncrna 2
+##MOUSE##
+# python3 parseMiranda.py ./mm10/Mirbase_mouse_noncode_filtered.tsv noncode lncrna 2 ./mm10/mm10_genesTranscripts_allDBs_and_pc.json mapping_keys.json
+# python3 parseMiranda.py ./mm10/Mirbase_mouse_gencode_lncRNA_filtered_new.tsv gencode lncrna 2 ./mm10/mm10_genesTranscripts_allDBs_and_pc.json mapping_keys.json
+# python3 parseMiranda.py ./mm10/Mirbase_mouse_gencode_pc_filtered_new.tsv gencode gene 2 ./mm10/mm10_genesTranscripts_allDBs_and_pc.json mapping_keys.json
+# python3 parseMiranda.py ./mm10/Mirbase_mouse_Promotor.tsv all all 2 ./mm10/mm10_genesTranscripts_allDBs_and_pc.json mapping_keys.json
+
+##HUMAN##
+# python3 parseMiranda.py ./hg38/Mirbase_human_noncode_filtered.tsv noncode lncrna 1 ./hg38/hg38_genesTranscripts_allDBs_and_pc.json mapping_keys.json
+# python3 parseMiranda.py ./hg38/Mirbase_human_lncipedia_filtered.tsv lncipedia lncrna 1 ./hg38/hg38_genesTranscripts_allDBs_and_pc.json mapping_keys.json
+# python3 parseMiranda.py ./hg38/Mirbase_human_gencode_lncRNA_filtered_new.tsv gencode lncrna 1 ./hg38/hg38_genesTranscripts_allDBs_and_pc.json mapping_keys.json
+# python3 parseMiranda.py ./hg38/Mirbase_human_gencode_pc_filtered_new.tsv gencode gene 1 ./hg38/hg38_genesTranscripts_allDBs_and_pc.json mapping_keys.json
 	
