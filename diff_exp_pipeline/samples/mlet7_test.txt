@@ -1,0 +1,4 @@
+run3/Hlet7A/Hlet7A3/fw.fastq.gz	run3/Hlet7A/Hlet7A3/rw.fastq.gz	Mlet7A3_test	After	2	1
+run3/Hlet7A/Hlet7A4/fw.fastq.gz	run3/Hlet7A/Hlet7A4/rw.fastq.gz	Mlet7A4_test	After	2	2
+run3/Hlet7B/Hlet7B3/fw.fastq.gz	run3/Hlet7B/Hlet7B3/rw.fastq.gz	Mlet7B3_test	Before	1	1
+run3/Hlet7B/Hlet7B4/fw.fastq.gz	run3/Hlet7B/Hlet7B4/rw.fastq.gz	Mlet7B4_test	Before	1	2

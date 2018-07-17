@@ -1,0 +1,12 @@
+name=Mlet7_test
+nameMapping=Mlet7_test
+nameQuant=Mlet7_test
+samples=/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/expression/pipeline/samples/mlet7_test.txt
+size=2
+command=mapping
+path=/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/
+pathFastq=/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/
+genomeDir=/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/expression_analysis/genome_mm10
+anno=/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/expression/pipeline/anno/mm10_primary_assembly_and_lncRNA_supergenes_exclude20.gtf
+jsonAnno=/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/expression/pipeline/anno/mm10_primary_assembly_and_lncRNA_withgenelength.json
+

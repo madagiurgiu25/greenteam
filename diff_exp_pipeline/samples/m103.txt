@@ -1,0 +1,10 @@
+run3/M103A/M103A1/fw.fastq.gz	run3/M103A/M103A1/rw.fastq.gz	M103A1	After	2	1
+run3/M103A/M103A2/fw.fastq.gz	run3/M103A/M103A2/rw.fastq.gz	M103A2	After	2	2
+run3/M103A/M103A3/fw.fastq.gz	run3/M103A/M103A3/rw.fastq.gz	M103A3	After	2	3
+run3/M103A/M103A4/fw.fastq.gz	run3/M103A/M103A4/rw.fastq.gz	M103A4	After	2	4
+run3/M103A/M103A5/fw.fastq.gz	run3/M103A/M103A5/rw.fastq.gz	M103A5	After	2	5
+run3/M103B/M103B1/fw.fastq.gz	run3/M103B/M103B1/rw.fastq.gz	M103B1	Before	1	1
+run3/M103B/M103B2/fw.fastq.gz	run3/M103B/M103B2/rw.fastq.gz	M103B2	Before	1	2
+run3/M103B/M103B3/fw.fastq.gz	run3/M103B/M103B3/rw.fastq.gz	M103B3	Before	1	3
+run3/M103B/M103B4/fw.fastq.gz	run3/M103B/M103B4/rw.fastq.gz	M103B4	Before	1	4
+run3/M103B/M103B5/fw.fastq.gz	run3/M103B/M103B5/rw.fastq.gz	M103B5	Before	1	5

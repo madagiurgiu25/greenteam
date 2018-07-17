@@ -1,0 +1,10 @@
+run3/Mlet7A/Mlet7A1/fw.fastq.gz	run3/Mlet7A/Mlet7A1/rw.fastq.gz	Mlet7A1	After	2	1
+run3/Mlet7A/Mlet7A2/fw.fastq.gz	run3/Mlet7A/Mlet7A2/rw.fastq.gz	Mlet7A2	After	2	2
+run3/Mlet7A/Mlet7A7/fw.fastq.gz	run3/Mlet7A/Mlet7A7/rw.fastq.gz	Mlet7A7	After	2	7
+run3/Mlet7A/Mlet7A8/fw.fastq.gz	run3/Mlet7A/Mlet7A8/rw.fastq.gz	Mlet7A8	After	2	8
+run3/Mlet7A/Mlet7A9/fw.fastq.gz	run3/Mlet7A/Mlet7A9/rw.fastq.gz	Mlet7A9	After	2	9
+run3/Mlet7B/Mlet7B1/fw.fastq.gz	run3/Mlet7B/Mlet7B1/rw.fastq.gz	Mlet7B1	Before	2	1
+run3/Mlet7B/Mlet7B2/fw.fastq.gz	run3/Mlet7B/Mlet7B2/rw.fastq.gz	Mlet7B2	Before	2	2
+run3/Mlet7B/Mlet7B7/fw.fastq.gz	run3/Mlet7B/Mlet7B7/rw.fastq.gz	Mlet7B7	Before	2	7
+run3/Mlet7B/Mlet7B8/fw.fastq.gz	run3/Mlet7B/Mlet7B8/rw.fastq.gz	Mlet7B8	Before	2	8
+run3/Mlet7B/Mlet7B9/fw.fastq.gz	run3/Mlet7B/Mlet7B9/rw.fastq.gz	Mlet7B9	Before	2	9

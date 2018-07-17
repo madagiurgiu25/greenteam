@@ -1,0 +1,11 @@
+name=H103
+samples=/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/expression/pipeline/samples/h103.txt
+size=6
+command=diffexp
+genelist=/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/data/TextMining/human_mir103_formatted.txt_mapped
+path=/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/
+pathFastq=/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/
+genomeDir=/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/Noncoding/expression_analysis/genome_hg38
+anno=/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/expression/pipeline/anno/hg38_primary_assembly_and_lncRNA.gtf
+jsonAnno=/home/proj/biocluster/praktikum/neap_ss18/neapss18_noncoding/daten/expression/pipeline/anno/hg38_primary_assembly_and_lncRNA_withgenelength.json
+
