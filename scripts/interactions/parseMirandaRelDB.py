@@ -5,6 +5,11 @@ import os
 from pprint import pprint
 from collections import defaultdict
 
+'''
+Create files of unique gene - transcript - mirna interactions (one interaction per line, incl. alignment information). Will be used for website (display miranda interactions as evidence)
+input: miranda .json interaction file
+output: mm10_interactions_*.txt
+'''
 def loadJson(my_file):
     df_file = os.path.join(cwd, my_file)
     with open(df_file) as df_input:    
@@ -50,7 +55,6 @@ if __name__ == '__main__':
     #output.write("Name_gene\tName_miRNA\tName_transcript\talign_score\tenergy\tmirna_start\tmirna_end\tlnc_start\tlnc_end"+"\talign_len\tmirna_iden\tlncrna_iden\tmirna_alignment\talignment\tlncrna_alignment\n")
     getGenesTranscripts(df)
 
-#python3 parseMirandaRelDB.py ./ Mirbase_mouse_gencode_pc_filtered_new_test.json mm10_interactions_pc_TEST.txt
 #python3 parseMirandaRelDB.py ./ mm10_interactions_allDBs_and_pc.json mm10_interactionsAllGenes.txt
 
 #python3 parseMirandaRelDB.py ./ Mirbase_mouse_gencode_lncRNA_filtered_new.json mm10_interactions_gencode_lncRNA.txt
