@@ -62,7 +62,7 @@ for (i in 1:4){
 data <- read.table("ena.txt", header = F, sep = "\t")
 edge_list <- unique(data.frame(V1=data$V1,V2=data$V5))
 
-edge_list <- subset(edge_list, substr(edge_list$V1,1,3) == 'LNC')
+edge_list <- subset(edge_list, substr(edge_list$V1,1,3) == 'ENS')
 
 ## Form undirected graph from edge list
 G <- graph.data.frame(edge_list,directed=FALSE)
@@ -82,19 +82,12 @@ m[] <- lapply(m, function(x) {
     as.numeric(as.character(x))
 })
 
-png("ena_lnc.png",width=800,height=600)
+png("ena_ens.png",width=800,height=600)
 upset(m,  point.size = 4, line.size = 1, 
       order.by = "freq",
-      text.scale = c(2 ,2, 2, 2, 2, 2), sets.x.label = "DiffExp calls per tool", mainbar.y.label = "Databases intersection" )
+      text.scale = c(2 ,2, 2, 2, 2, 2), sets.x.label = "DiffExp calls per Experiment", mainbar.y.label = "LNC expression over the experiments" )
 dev.off()
-write.table(m,file="ena_matrix_lnc.txt",row.names = row.names(m), col.names =T, sep="\t",quote=F)
-
-m <- subset(m, substr(row.names(m),1,3) == 'LNC')
-png(list3[i],width=800,height=600)
-upset(m,  point.size = 4, line.size = 1, 
-      order.by = "freq",
-      text.scale = c(2 ,2, 2, 2, 2, 2), sets.x.label = "DiffExp calls per tool", mainbar.y.label = "Databases intersection" )
-dev.off()
+write.table(m,file="ena_matrix_ens.txt",row.names = row.names(m), col.names =T, sep="\t",quote=F)
 
 
 # write.table(m,file=list4[i],row.names = row.names(m), col.names =T, sep="\t",quote=F)
@@ -110,6 +103,69 @@ ggplot(data,aes(x=V1,y=as.numeric(as.character(V2)),group=as.factor(V5),color=as
     scale_color_discrete(name = "Treatment") + ggtitle("Diff Exp LNC in IL1alpha and PDGF1 (but not in treatment=both)")
 
 
+setwd("e:\\masterpraktikum\\DiffExp")
+datat <- data.frame(read.table("ena.txt.json_protein_coding_coexpression", header = T, sep = "\t"))
+datat <- rbind(data,data.frame(read.table("ena.txt.json_miRNA_coexpression", header = T, sep = "\t")))
 
-p<-ggplot(data,aes(x=FID)); 
-p+geom_bar(aes(x=factor(FID),y=..count..,fill=STATUS)) 
+ggplot(data) + 
+geom_point(aes(x=as.numeric(as.character(data$LNC_log2FC)),
+               y=as.numeric(as.character(data$ENS_log2FC)))) 
+    + facet_wrap( ~ ENS_type) + 
+    xlab("LNC_log2FC") + ylab("ENS_log2FC") + 
+geom_point(dt = subset(data, data$LNC_tools > 1 & data$ENS_tools > 1),aes(x=as.numeric(as.character(dt$LNC_log2FC)),
+                                                                          y=as.numeric(as.character(dt$ENS_log2FC))),colour="red", shape=1, size=2) 
+
+data <- subset(datat,datat$Experiment == 'SRR20546_control_IL1a' & datat$NEIG_type != 'overlap')
+
+with(data, plot(LNC_log2FC, ENS_log2FC, pch=20, main="Coexpression control_IL1a",ylab = "ENS_log2FC",xlab="LNC_log2FC",col="grey",xlim=c(-8,8),ylim=c(-8,8)))
+with(subset(data, as.numeric(as.character(data$LNC_count_tools)) > 1 | as.numeric(as.character(data$ENS_count_tools)) > 1), points(LNC_log2FC, ENS_log2FC, pch=20, col="blue"))
+with(subset(data, as.numeric(as.character(data$LNC_count_tools)) > 1 & as.numeric(as.character(data$ENS_count_tools)) > 1), points(LNC_log2FC, ENS_log2FC, pch=20, col="red"))
+with(data,legend("topleft",c("all", "LNC|ENS (#tools >1)" ,"LNC&ENS (#tools >1)"), fill = c("grey","blue","red")))
+with(abline(h=0))
+with(abline(v=0))
+
+data <- subset(datat,datat$Experiment == 'SRR20546_control_both' & datat$NEIG_type != 'overlap')
+
+with(data, plot(LNC_log2FC, ENS_log2FC, pch=20, main="Coexpression control_both",ylab = "ENS_log2FC",xlab="LNC_log2FC",col="grey",xlim=c(-8,8),ylim=c(-8,8)))
+with(subset(data, as.numeric(as.character(data$LNC_count_tools)) > 1 | as.numeric(as.character(data$ENS_count_tools)) > 1), points(LNC_log2FC, ENS_log2FC, pch=20, col="blue"))
+with(subset(data, as.numeric(as.character(data$LNC_count_tools)) > 1 & as.numeric(as.character(data$ENS_count_tools)) > 1), points(LNC_log2FC, ENS_log2FC, pch=20, col="red"))
+with(data,legend("topleft",c("all", "LNC|ENS (#tools >1)" ,"LNC&ENS (#tools >1)"), fill = c("grey","blue","red")))
+with(abline(h=0))
+with(abline(v=0))
+
+data <- subset(datat,datat$Experiment == 'SRR20546_control_PDGF1' & datat$NEIG_type != 'overlap')
+
+with(data, plot(LNC_log2FC, ENS_log2FC, pch=20, main="Coexpression control_PDGF1",ylab = "ENS_log2FC",xlab="LNC_log2FC",col="grey",xlim=c(-8,8),ylim=c(-8,8)))
+with(subset(data, as.numeric(as.character(data$LNC_count_tools)) > 1 | as.numeric(as.character(data$ENS_count_tools)) > 1), points(LNC_log2FC, ENS_log2FC, pch=20, col="blue"))
+with(subset(data, as.numeric(as.character(data$LNC_count_tools)) > 1 & as.numeric(as.character(data$ENS_count_tools)) > 1), points(LNC_log2FC, ENS_log2FC, pch=20, col="red"))
+with(data,legend("topleft",c("all", "LNC|ENS (#tools >1)" ,"LNC&ENS (#tools >1)"), fill = c("grey","blue","red")))
+with(abline(h=0))
+with(abline(v=0))
+
+
+
+
+###### 
+setwd("e:\\masterpraktikum\\atherosclerosis")
+
+data <- read.table("ena_il1a_list.txt", header = F, sep = "\t")
+data <- rbind(data,data.frame(read.table("ena_pdgf1_list.txt", header = F, sep = "\t")))
+edge_list <- unique(data.frame(V1=data$V1,V2=data$V2))
+G <- graph.data.frame(edge_list,directed=FALSE)
+A<-as_adjacency_matrix(G,type="both",names=TRUE,sparse=FALSE)
+
+size_row <- length(unique(edge_list$V1))
+size_col <- length(unique(edge_list$V2))
+
+
+matrix <- A[1:size_row, (size_row + 1):(size_row+size_col)]
+
+m <- data.frame(matrix)
+m[] <- lapply(m, function(x) {
+    as.numeric(as.character(x))
+})
+
+heatmap_top100<- d3heatmap(m, scale = "column", colors="RdYlBu", dendrogram="none", Rowv=F)
+saveWidget(heatmap_top100, "IL1a_PDGF1.html")
+
+
