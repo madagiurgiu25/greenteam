@@ -28,11 +28,10 @@ if __name__ == '__main__':
 
 	output = defaultdict(dict)
 	for line in diffexp_in:
-		#print(line)
 		line_array = line.split("\t")
 		gene_id = line_array[0].split(".")[0]
 		log2fc = line_array[2]
-		output[gene_id]['log2fc'] = str(log2fc)
+		output[gene_id]['log2fc'] = log2fc
 		output[gene_id]['ortholog'] = None
 		output[gene_id]['hub'] = 'None'
 		output[gene_id]['valid_interaction'] = 'FALSE'
@@ -40,9 +39,9 @@ if __name__ == '__main__':
 
 		#output_line = gene + "\t" + log2fc
 		if gene_id in gene_features.keys():
-			# check ortholog + hub
 			output[gene_id]['ortholog'] = gene_features[gene_id]['ortholog']
-			output[gene_id]['hub'] = str(gene_features[gene_id]['hub'])
+			if gene_features[gene_id]['hub'] == 'TRUE':
+				output[gene_id]['hub'] = str(gene_features[gene_id]['total_nr_interactions_per_gene'])
 			# check mirna
 			interaction_check = 0
 			for mirna in gene_features[gene_id]['mirnas']:
@@ -56,7 +55,7 @@ if __name__ == '__main__':
 	output_json.write(json.dumps(output, indent=4)) 
 	output_json.close()
 	for gene in output.keys():
-		output_line = gene + "\t" + output[gene_id]['log2fc']
+		output_line = gene + "\t" + output[gene]['log2fc']
 		if output[gene]['ortholog']:
 			output_line = output_line +"\t"+output[gene]['ortholog']
 		else:
