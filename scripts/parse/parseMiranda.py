@@ -265,7 +265,7 @@ if __name__ == '__main__':
     df_mapping_ids = mp.loadJson(input_mappingKeys)
     df_mapping_gts = mp.loadJson(input_genesTranscripts)
 
-    if input_split:
+    if input_split and input_split == "yes":
         mp.split(input_genesTranscripts, input_mappingKeys)
         for subfile in mp.arr_split_files:
             fin = mp.loadTsv(subfile, 1)
